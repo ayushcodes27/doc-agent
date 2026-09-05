@@ -1,10 +1,10 @@
-# 🧾 DocAgent — Agentic Invoice Processing Engine
+#  DocAgent — Agentic Invoice Processing Engine
 
 DocAgent is an autonomous agentic document processing system built to extract, validate, check compliance, detect anomalies, and route invoice approval workflows with a complete audit trail.
 
 ---
 
-## 🏗️ Architecture & Tech Stack
+##  Architecture & Tech Stack
 
 - **Agent Orchestrator:** LangGraph (State Machine)
 - **Extraction & Reasoning:** Google Gemini API
@@ -15,7 +15,7 @@ DocAgent is an autonomous agentic document processing system built to extract, v
 
 ---
 
-## 🚀 Quickstart
+##  Quickstart
 
 ### 1. Clone the repository
 ```bash
@@ -36,5 +36,5 @@ pip install -r requirements.txt
 
 ---
 
-## 📜 License
+##  License
 MIT License
