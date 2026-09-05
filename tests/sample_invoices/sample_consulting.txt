@@ -1,0 +1,21 @@
+TAX INVOICE
+Zenith Cloud Consulting LLC
+100 Innovation Way, Suite 400, San Francisco, CA 94105
+Tax ID: US-94-3829102
+
+Client:
+DocAgent Operations Inc.
+
+Invoice #: ZCC-99420
+Date: 2026-08-20
+Due Date: 2026-08-20
+Payment Terms: Due Upon Receipt
+
+Services Rendered:
+- Cloud Architecture & Migration Review (Hours: 40, Rate: $150.00, Total: $6000.00)
+- Security & Compliance Audit Assessment (Hours: 15, Rate: $200.00, Total: $3000.00)
+
+Subtotal: $9000.00
+Tax: $0.00
+Total Due: $9000.00
+Currency: USD

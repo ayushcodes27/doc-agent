@@ -1,0 +1,22 @@
+INVOICE
+Acme Tech Solutions Pvt Ltd
+Plot 45, Cyber City, Bangalore, Karnataka - 560100
+GSTIN: 29AABCU9603R1ZM
+
+Bill To:
+Nova Global Services
+Tower 2, Mindspace IT Park, Hyderabad - 500081
+
+Invoice Number: INV-2026-0891
+Invoice Date: 2026-08-15
+Due Date: 2026-09-14
+Payment Terms: Net 30 Days
+
+Items:
+1. Dell UltraSharp 27" 4K Monitor (Quantity: 2, Unit Price: 35000.00, Total: 70000.00)
+2. Logitech MX Master 3S Wireless Mouse (Quantity: 5, Unit Price: 8000.00, Total: 40000.00)
+3. Ergonomic Mechanical Keyboard (Quantity: 3, Unit Price: 10000.00, Total: 30000.00)
+
+Subtotal: INR 140000.00
+IGST (18%): INR 25200.00
+Total Amount: INR 165200.00
