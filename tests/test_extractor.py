@@ -1,7 +1,7 @@
 import json
 import pytest
 from unittest.mock import MagicMock, patch
-from tools.extractor import extract_invoice_data, get_genai_model
+from tools.extractor import extract_invoice_data, get_genai_client_and_model
 from api.models import ExtractedInvoice
 
 
@@ -51,13 +51,13 @@ def test_extract_invoice_data_missing_api_key():
             extract_invoice_data("Sample invoice text", api_key="")
 
 
-@patch("tools.extractor.get_genai_model")
-def test_extract_invoice_data_success(mock_get_model):
-    mock_model = MagicMock()
+@patch("tools.extractor.get_genai_client_and_model")
+def test_extract_invoice_data_success(mock_get_client_model):
+    mock_client = MagicMock()
     mock_response = MagicMock()
     mock_response.text = f"```json\n{SAMPLE_GEMINI_RESPONSE}\n```"
-    mock_model.generate_content.return_value = mock_response
-    mock_get_model.return_value = mock_model
+    mock_client.models.generate_content.return_value = mock_response
+    mock_get_client_model.return_value = (mock_client, "gemini-2.0-flash")
 
     result = extract_invoice_data(
         "Dummy text content of invoice",

@@ -1,7 +1,8 @@
 import json
 import logging
 from typing import Dict, Any, Optional
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 
 from config import settings
 from api.models import ExtractedInvoice
@@ -52,16 +53,16 @@ Important Guidelines:
 """
 
 
-def get_genai_model(api_key: Optional[str] = None, model_name: Optional[str] = None):
-    """Configure and return the Gemini GenerativeModel instance."""
+def get_genai_client_and_model(api_key: Optional[str] = None, model_name: Optional[str] = None):
+    """Configure and return the Gemini Client and model name."""
     key = api_key or settings.GEMINI_API_KEY
     if not key:
         raise ValueError(
             "GEMINI_API_KEY is not configured. Please set it in your .env file or environment."
         )
-    genai.configure(api_key=key)
+    client = genai.Client(api_key=key)
     model = model_name or settings.GEMINI_MODEL
-    return genai.GenerativeModel(model)
+    return client, model
 
 
 def extract_invoice_data(
@@ -76,13 +77,14 @@ def extract_invoice_data(
     if not document_text or not document_text.strip():
         raise ValueError("Document text is empty. Cannot perform extraction.")
 
-    model = get_genai_model(api_key=api_key, model_name=model_name)
+    client, model = get_genai_client_and_model(api_key=api_key, model_name=model_name)
     prompt = EXTRACTION_PROMPT_TEMPLATE.format(document_text=document_text)
 
     try:
-        response = model.generate_content(
-            prompt,
-            generation_config=genai.GenerationConfig(
+        response = client.models.generate_content(
+            model=model,
+            contents=prompt,
+            config=types.GenerateContentConfig(
                 response_mime_type="application/json",
                 temperature=0.1,
             )
