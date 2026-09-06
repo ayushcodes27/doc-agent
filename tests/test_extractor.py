@@ -41,7 +41,7 @@ SAMPLE_GEMINI_RESPONSE = json.dumps({
 
 
 def test_extract_invoice_data_empty_input():
-    with pytest.raises(ValueError, match="Document text is empty"):
+    with pytest.raises(ValueError, match="Document text and bytes are empty"):
         extract_invoice_data("")
 
 
@@ -57,7 +57,7 @@ def test_extract_invoice_data_success(mock_get_client_model):
     mock_response = MagicMock()
     mock_response.text = f"```json\n{SAMPLE_GEMINI_RESPONSE}\n```"
     mock_client.models.generate_content.return_value = mock_response
-    mock_get_client_model.return_value = (mock_client, "gemini-2.0-flash")
+    mock_get_client_model.return_value = (mock_client, "gemini-1.5-pro")
 
     result = extract_invoice_data(
         "Dummy text content of invoice",

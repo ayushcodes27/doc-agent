@@ -1,5 +1,6 @@
 # Core LLM & Frameworks
 google-genai>=0.2.0
+groq>=0.11.0
 langgraph>=0.2.0
 langchain-core>=0.3.0
 

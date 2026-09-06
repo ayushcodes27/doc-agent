@@ -9,6 +9,8 @@ class AgentState(TypedDict):
     # Input document
     document_text: str
     document_path: str
+    document_bytes: Optional[bytes]
+    mime_type: Optional[str]
 
     # Extracted data
     extracted_data: Optional[Dict[str, Any]]

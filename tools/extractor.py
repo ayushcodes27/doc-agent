@@ -1,5 +1,6 @@
 import json
 import logging
+import time
 from typing import Dict, Any, Optional
 from google import genai
 from google.genai import types
@@ -13,15 +14,10 @@ logger = logging.getLogger(__name__)
 EXTRACTION_PROMPT_TEMPLATE = """You are an expert financial document intelligence system.
 Extract all invoice metadata, monetary amounts, and line items from the provided document into a structured JSON object.
 
-DOCUMENT CONTENT:
-\"\"\"
-{document_text}
-\"\"\"
-
 Extraction Instructions & Rules:
 1. Extract exact values from the document.
 2. Return ONLY a valid, parseable JSON object matching this schema:
-{{
+{
     "vendor_name": "string (name of supplier/company issuing invoice)",
     "vendor_id": "string or null (tax ID, GSTIN, VAT, or registration number if present)",
     "invoice_number": "string (unique identifier or invoice ID)",
@@ -32,16 +28,16 @@ Extraction Instructions & Rules:
     "tax_amount": 0.00,
     "total_amount": 0.00,
     "line_items": [
-        {{
+        {
             "description": "string",
             "quantity": 1.0,
             "unit_price": 0.00,
             "total": 0.00
-        }}
+        }
     ],
     "payment_terms": "string or null (e.g. Net 30, Due on receipt)",
     "confidence_score": 0.95
-}}
+}
 
 Important Guidelines:
 - If date is in DD/MM/YYYY or text format, convert it to ISO "YYYY-MM-DD".
@@ -66,48 +62,68 @@ def get_genai_client_and_model(api_key: Optional[str] = None, model_name: Option
 
 
 def extract_invoice_data(
-    document_text: str,
+    document_text: str = "",
+    document_bytes: Optional[bytes] = None,
+    mime_type: Optional[str] = None,
     api_key: Optional[str] = None,
     model_name: Optional[str] = None
 ) -> ExtractedInvoice:
     """
-    Extract structured invoice data from raw document text using Gemini.
+    Extract structured invoice data from raw document text or bytes using Gemini.
     Returns a validated ExtractedInvoice Pydantic model.
     """
-    if not document_text or not document_text.strip():
-        raise ValueError("Document text is empty. Cannot perform extraction.")
+    if not document_text.strip() and not document_bytes:
+        raise ValueError("Document text and bytes are empty. Cannot perform extraction.")
 
     client, model = get_genai_client_and_model(api_key=api_key, model_name=model_name)
-    prompt = EXTRACTION_PROMPT_TEMPLATE.format(document_text=document_text)
+    
+    prompt = EXTRACTION_PROMPT_TEMPLATE
+    
+    contents_to_send = []
+    
+    # Gemini officially supports passing application/pdf directly! No need to convert to image!
+    if document_bytes and mime_type:
+        contents_to_send.append(types.Part.from_bytes(data=document_bytes, mime_type=mime_type))
+    elif document_text:
+        contents_to_send.append(f"DOCUMENT CONTENT:\n{document_text}")
+    
+    contents_to_send.append(prompt)
 
-    try:
-        response = client.models.generate_content(
-            model=model,
-            contents=prompt,
-            config=types.GenerateContentConfig(
-                response_mime_type="application/json",
-                temperature=0.1,
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            response = client.models.generate_content(
+                model=model,
+                contents=contents_to_send,
+                config=types.GenerateContentConfig(
+                    response_mime_type="application/json",
+                    temperature=0.1,
+                )
             )
-        )
-        
-        response_text = response.text.strip()
-        if response_text.startswith("```"):
-            lines = response_text.splitlines()
-            if lines[0].startswith("```"):
-                lines = lines[1:]
-            if lines and lines[-1].startswith("```"):
-                lines = lines[:-1]
-            response_text = "\n".join(lines).strip()
+            
+            response_text = response.text.strip()
+            if response_text.startswith("```"):
+                lines = response_text.splitlines()
+                if lines[0].startswith("```"):
+                    lines = lines[1:]
+                if lines and lines[-1].startswith("```"):
+                    lines = lines[:-1]
+                response_text = "\n".join(lines).strip()
 
-        data = json.loads(response_text)
-        
-        # Parse and validate with Pydantic
-        extracted = ExtractedInvoice(**data)
-        return extracted
+            data = json.loads(response_text)
+            
+            # Parse and validate with Pydantic
+            extracted = ExtractedInvoice(**data)
+            return extracted
 
-    except json.JSONDecodeError as e:
-        logger.error(f"Failed to parse LLM response as JSON: {e}")
-        raise ValueError(f"LLM returned invalid JSON output: {str(e)}")
-    except Exception as e:
-        logger.error(f"Error during invoice extraction: {e}")
-        raise
+        except json.JSONDecodeError as e:
+            logger.error(f"Failed to parse LLM response as JSON: {e}")
+            raise ValueError(f"LLM returned invalid JSON output: {str(e)}")
+        except Exception as e:
+            error_str = str(e)
+            if "503" in error_str and attempt < max_retries - 1:
+                logger.warning(f"Gemini API 503 Overloaded. Retrying in 2 seconds... (Attempt {attempt+1}/{max_retries})")
+                time.sleep(2)
+                continue
+            logger.error(f"Error during invoice extraction: {e}")
+            raise

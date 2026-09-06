@@ -26,9 +26,11 @@ def extract_data(state: Dict[str, Any]) -> Dict[str, Any]:
     """Node: Extract structured data from document text using LLM extractor tool."""
     audit_trail = list(state.get("audit_trail", []))
     doc_text = state.get("document_text", "")
+    doc_bytes = state.get("document_bytes")
+    mime_type = state.get("mime_type")
 
-    if not doc_text or not doc_text.strip():
-        _log_audit(audit_trail, "extraction", "Failed: Empty document text provided.")
+    if not doc_text.strip() and not doc_bytes:
+        _log_audit(audit_trail, "extraction", "Failed: Empty document text and no bytes provided.")
         return {
             "extracted_data": None,
             "extraction_confidence": 0.0,
@@ -36,7 +38,11 @@ def extract_data(state: Dict[str, Any]) -> Dict[str, Any]:
         }
 
     try:
-        extracted: ExtractedInvoice = extract_invoice_data(doc_text)
+        extracted: ExtractedInvoice = extract_invoice_data(
+            document_text=doc_text,
+            document_bytes=doc_bytes,
+            mime_type=mime_type
+        )
         # Convert ExtractedInvoice Pydantic model to dict safely serializable to JSON
         extracted_dict = json.loads(extracted.model_dump_json())
         confidence = float(extracted.confidence_score)
@@ -189,7 +195,11 @@ def make_decision(state: Dict[str, Any]) -> Dict[str, Any]:
     extracted_data = state.get("extracted_data") or {}
     total_amount = float(extracted_data.get("total_amount", 0.0) or 0.0)
 
-    if is_duplicate:
+    if not extracted_data:
+        decision = "reject"
+        level = "auto"
+        reason = "Rejection: No data was extracted from the document."
+    elif is_duplicate:
         decision = "reject"
         level = "auto"
         reason = "Duplicate invoice detected with matching vendor, invoice number, and total amount."
