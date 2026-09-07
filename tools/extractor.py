@@ -49,45 +49,40 @@ Important Guidelines:
 """
 
 
-def get_genai_client_and_model(api_key: Optional[str] = None, model_name: Optional[str] = None):
-    """Configure and return the Gemini Client and model name."""
-    key = api_key or settings.GEMINI_API_KEY
-    if not key:
-        raise ValueError(
-            "GEMINI_API_KEY is not configured. Please set it in your .env file or environment."
-        )
-    client = genai.Client(api_key=key)
-    model = model_name or settings.GEMINI_MODEL
-    return client, model
+def _clean_json_response(raw_text: str) -> Dict[str, Any]:
+    """Helper to parse JSON from LLM output, stripping markdown formatting if present."""
+    text = raw_text.strip()
+    if text.startswith("```"):
+        lines = text.splitlines()
+        if lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].startswith("```"):
+            lines = lines[:-1]
+        text = "\n".join(lines).strip()
+    return json.loads(text)
 
 
-def extract_invoice_data(
+def extract_with_gemini(
     document_text: str = "",
     document_bytes: Optional[bytes] = None,
     mime_type: Optional[str] = None,
     api_key: Optional[str] = None,
-    model_name: Optional[str] = None
+    model_name: Optional[str] = None,
 ) -> ExtractedInvoice:
-    """
-    Extract structured invoice data from raw document text or bytes using Gemini.
-    Returns a validated ExtractedInvoice Pydantic model.
-    """
-    if not document_text.strip() and not document_bytes:
-        raise ValueError("Document text and bytes are empty. Cannot perform extraction.")
+    """Extract invoice data using Google Gemini API."""
+    key = api_key or settings.GEMINI_API_KEY
+    if not key:
+        raise ValueError("GEMINI_API_KEY is not configured.")
 
-    client, model = get_genai_client_and_model(api_key=api_key, model_name=model_name)
-    
-    prompt = EXTRACTION_PROMPT_TEMPLATE
-    
+    client = genai.Client(api_key=key)
+    model = model_name or settings.GEMINI_MODEL
+
     contents_to_send = []
-    
-    # Gemini officially supports passing application/pdf directly! No need to convert to image!
     if document_bytes and mime_type:
         contents_to_send.append(types.Part.from_bytes(data=document_bytes, mime_type=mime_type))
     elif document_text:
         contents_to_send.append(f"DOCUMENT CONTENT:\n{document_text}")
-    
-    contents_to_send.append(prompt)
+    contents_to_send.append(EXTRACTION_PROMPT_TEMPLATE)
 
     max_retries = 3
     for attempt in range(max_retries):
@@ -100,30 +95,124 @@ def extract_invoice_data(
                     temperature=0.1,
                 )
             )
-            
-            response_text = response.text.strip()
-            if response_text.startswith("```"):
-                lines = response_text.splitlines()
-                if lines[0].startswith("```"):
-                    lines = lines[1:]
-                if lines and lines[-1].startswith("```"):
-                    lines = lines[:-1]
-                response_text = "\n".join(lines).strip()
-
-            data = json.loads(response_text)
-            
-            # Parse and validate with Pydantic
-            extracted = ExtractedInvoice(**data)
-            return extracted
-
-        except json.JSONDecodeError as e:
-            logger.error(f"Failed to parse LLM response as JSON: {e}")
-            raise ValueError(f"LLM returned invalid JSON output: {str(e)}")
+            data = _clean_json_response(response.text)
+            return ExtractedInvoice(**data)
         except Exception as e:
-            error_str = str(e)
-            if "503" in error_str and attempt < max_retries - 1:
-                logger.warning(f"Gemini API 503 Overloaded. Retrying in 2 seconds... (Attempt {attempt+1}/{max_retries})")
+            if "503" in str(e) and attempt < max_retries - 1:
                 time.sleep(2)
                 continue
-            logger.error(f"Error during invoice extraction: {e}")
             raise
+
+
+def extract_with_github_models(
+    document_text: str = "",
+    token: Optional[str] = None,
+    model_name: Optional[str] = None,
+    endpoint: Optional[str] = None,
+) -> ExtractedInvoice:
+    """Extract invoice data using GitHub Models (Azure AI inference endpoint) via OpenAI SDK."""
+    try:
+        from openai import OpenAI
+    except ImportError:
+        raise ImportError("The 'openai' package is required for GitHub Models. Please run: pip install openai")
+
+    gh_token = token or settings.GITHUB_TOKEN
+    if not gh_token:
+        raise ValueError("GITHUB_TOKEN is not configured. Please add it to your .env file.")
+
+    gh_endpoint = endpoint or settings.GITHUB_ENDPOINT
+    gh_model = model_name or settings.GITHUB_MODEL
+
+    client = OpenAI(
+        base_url=gh_endpoint,
+        api_key=gh_token,
+        timeout=30.0,
+    )
+
+    messages = [
+        {"role": "system", "content": EXTRACTION_PROMPT_TEMPLATE},
+        {"role": "user", "content": f"Please extract structured invoice data from the following document:\n\n{document_text}"}
+    ]
+
+    response = client.chat.completions.create(
+        model=gh_model,
+        messages=messages,
+        response_format={"type": "json_object"},
+        temperature=0.1,
+    )
+
+    content = response.choices[0].message.content or "{}"
+    data = _clean_json_response(content)
+    return ExtractedInvoice(**data)
+
+
+def extract_invoice_data(
+    document_text: str = "",
+    document_bytes: Optional[bytes] = None,
+    mime_type: Optional[str] = None,
+    provider: Optional[str] = None,
+    api_key: Optional[str] = None,
+    model_name: Optional[str] = None
+) -> ExtractedInvoice:
+    """
+    Extract structured invoice data from raw document text or bytes.
+    Supports provider selection ('gemini', 'github_models', 'auto') with automatic fallback.
+    """
+    if not document_text.strip() and not document_bytes:
+        raise ValueError("Document text and bytes are empty. Cannot perform extraction.")
+
+    selected_provider = (provider or settings.LLM_PROVIDER or "auto").lower()
+
+    # If provider is explicitly GitHub Models
+    if selected_provider in ["github_models", "github", "azure"]:
+        return extract_with_github_models(
+            document_text=document_text,
+            token=api_key or settings.GITHUB_TOKEN,
+            model_name=model_name or settings.GITHUB_MODEL
+        )
+
+    # If provider is explicitly Gemini
+    if selected_provider == "gemini":
+        return extract_with_gemini(
+            document_text=document_text,
+            document_bytes=document_bytes,
+            mime_type=mime_type,
+            api_key=api_key,
+            model_name=model_name
+        )
+
+    # AUTO Mode: Try primary provider (Gemini if key set, else GitHub Models) with failover
+    errors = []
+    
+    # 1. Try Gemini first if key exists
+    if settings.GEMINI_API_KEY:
+        try:
+            return extract_with_gemini(
+                document_text=document_text,
+                document_bytes=document_bytes,
+                mime_type=mime_type,
+                api_key=api_key,
+                model_name=model_name
+            )
+        except Exception as e:
+            logger.warning(f"Gemini extraction failed ({e}), attempting fallback to GitHub Models...")
+            errors.append(f"Gemini error: {e}")
+
+    # 2. Try GitHub Models fallback
+    if settings.GITHUB_TOKEN and document_text.strip():
+        try:
+            return extract_with_github_models(
+                document_text=document_text,
+                token=settings.GITHUB_TOKEN,
+                model_name=settings.GITHUB_MODEL
+            )
+        except Exception as e:
+            logger.warning(f"GitHub Models extraction failed: {e}")
+            errors.append(f"GitHub Models error: {e}")
+
+    # If both failed or none configured
+    if errors:
+        raise RuntimeError(f"All configured LLM providers failed: {'; '.join(errors)}")
+    else:
+        raise ValueError("No valid LLM credentials configured. Please set GEMINI_API_KEY or GITHUB_TOKEN in .env.")
+

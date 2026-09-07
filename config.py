@@ -5,9 +5,13 @@ from typing import Optional
 
 class Settings(BaseSettings):
     # LLM Config
+    LLM_PROVIDER: str = "auto"  # 'auto', 'gemini', 'github_models', 'groq'
     GEMINI_API_KEY: str = ""
-    GROQ_API_KEY: str = ""
     GEMINI_MODEL: str = "gemini-3.6-flash"
+    GITHUB_TOKEN: str = ""
+    GITHUB_MODEL: str = "gpt-4o-mini"
+    GITHUB_ENDPOINT: str = "https://models.inference.ai.azure.com"
+    GROQ_API_KEY: str = ""
     
     # Database & Cache
     DATABASE_URL: str = "postgresql://docagent:docagent@localhost:5432/docagent"

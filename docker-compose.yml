@@ -9,6 +9,9 @@ services:
       - DATABASE_URL=postgresql://docagent:docagent@postgres:5432/docagent
       - REDIS_URL=redis://redis:6379
       - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - GITHUB_MODEL=${GITHUB_MODEL:-gpt-4o-mini}
+      - LLM_PROVIDER=${LLM_PROVIDER:-auto}
     depends_on: 
       - postgres
       - redis

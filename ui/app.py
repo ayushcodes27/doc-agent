@@ -660,7 +660,7 @@ if uploaded_file is not None and process_clicked:
                         for idx, entry in enumerate(audit_trail):
                             ts = (entry.get("timestamp") or "")[:19].replace("T", " ")
                             is_terminal = (idx == total_entries - 1) or (entry.get("step") in ["decision", "report_generated"])
-                            terminal_class = f"terminal {css_class}" if is_terminal else ""
+                            terminal_class = "terminal" if is_terminal else ""
                             items_html += (
                                 f'<div class="timeline-item {terminal_class}">'
                                 f'<div class="timeline-ts">{esc(ts)}</div>'
