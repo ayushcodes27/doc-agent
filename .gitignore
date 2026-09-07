@@ -53,6 +53,10 @@ temp/
 *.jpg
 *.jpeg
 
+# Allow documentation assets
+!images/
+!images/**
+
 # Testing & Logs
 .pytest_cache/
 .coverage

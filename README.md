@@ -75,15 +75,21 @@
 ## User Interface & Screenshots
 
 ### 1. Document Upload & Processing Dashboard
+
 Upload PDF or TXT invoices to initiate multi-stage extraction, compliance verification, and routing.
+
 ![Upload Dashboard](images/image1.png)
 
 ### 2. Extracted Data, Risk Scoring & Anomaly Inspection
+
 Live feedback with extracted table breakdown, risk gauge, and compliance rule results.
+
 ![Extraction & Compliance](images/image2.png)
 
 ### 3. Step-by-Step Agent Audit Trail
+
 Transparent observability into every step executed by the LangGraph state machine.
+
 ![Agent Audit Trail](images/image3.png)
 
 ---
