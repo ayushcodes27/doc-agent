@@ -93,21 +93,35 @@ def check_duplicate(
 
     if r is not None:
         try:
-            existing = r.get(cache_key)
-            if existing:
+            if record_if_new:
+                was_new = r.set(cache_key, invoice_id, nx=True, ex=ttl_seconds)
+                if not was_new:
+                    existing = r.get(cache_key)
+                    return {
+                        "is_duplicate": True,
+                        "original_id": existing.decode("utf-8") if isinstance(existing, bytes) and existing else str(existing) if existing else "unknown",
+                        "fingerprint": fingerprint,
+                        "storage": "redis",
+                    }
                 return {
-                    "is_duplicate": True,
-                    "original_id": existing.decode("utf-8") if isinstance(existing, bytes) else str(existing),
+                    "is_duplicate": False,
                     "fingerprint": fingerprint,
                     "storage": "redis",
                 }
-            if record_if_new:
-                r.setex(cache_key, ttl_seconds, invoice_id)
-            return {
-                "is_duplicate": False,
-                "fingerprint": fingerprint,
-                "storage": "redis",
-            }
+            else:
+                existing = r.get(cache_key)
+                if existing:
+                    return {
+                        "is_duplicate": True,
+                        "original_id": existing.decode("utf-8") if isinstance(existing, bytes) else str(existing),
+                        "fingerprint": fingerprint,
+                        "storage": "redis",
+                    }
+                return {
+                    "is_duplicate": False,
+                    "fingerprint": fingerprint,
+                    "storage": "redis",
+                }
         except Exception as e:
             logger.warning(f"Redis error during duplicate check, falling back: {e}")
 

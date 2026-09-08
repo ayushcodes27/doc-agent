@@ -1,5 +1,6 @@
 from typing import Dict, Any, Optional
 from langgraph.graph import StateGraph, END
+from langgraph.checkpoint.memory import MemorySaver
 from agent.state import AgentState
 from agent.nodes import (
     extract_data,
@@ -37,7 +38,8 @@ def build_workflow():
     workflow.add_edge("decide", "report")
     workflow.add_edge("report", END)
 
-    return workflow.compile()
+    checkpointer = MemorySaver()
+    return workflow.compile(checkpointer=checkpointer)
 
 
 def run_docagent(document_text: str, document_path: str = "document.pdf") -> Dict[str, Any]:
@@ -60,4 +62,5 @@ def run_docagent(document_text: str, document_path: str = "document.pdf") -> Dic
         "audit_trail": [],
         "messages": [],
     }
-    return app.invoke(initial_state)
+    config = {"configurable": {"thread_id": document_path}}
+    return app.invoke(initial_state, config=config)

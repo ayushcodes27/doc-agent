@@ -67,7 +67,7 @@
    - Uses SHA-256 fingerprint hashing over key invoice attributes (`vendor_name:invoice_number:total_amount`) to instantly catch duplicate submissions.
 5. **Dynamic Risk-Weighted Routing:**
    - Computes an aggregate risk score (0.00 – 1.00) and routes invoices to `AUTO_APPROVE`, `MANAGER_REVIEW`, `DIRECTOR_REVIEW`, or `REJECT`.
-6. **Regulated-Ready Audit Trail:**
+6. **Audit-Trail Patterns Modeled on Regulated-Industry Requirements:**
    - Every state transition, confidence score, and decision rationale is recorded into an append-only audit trail.
 
 ---
@@ -102,7 +102,7 @@ Transparent observability into every step executed by the LangGraph state machin
 | **LLM Provider** | Google Gemini 2.5 Flash / GitHub Models | Fast latency, high context window, cost-effective structured JSON schema enforcement, with fallback support. |
 | **Duplicate Detection** | Redis Fingerprints | O(1) lookup for fast idempotency and duplicate checking with configurable TTL expiration. |
 | **Compliance Engine** | DB-Driven Rules | Rules stored dynamically in PostgreSQL so compliance officers can modify thresholds without code redeployments. |
-| **Audit Trail** | Append-only DB Logs | Provides an immutable event stream required for financial compliance and regulatory audits (SOC2 / SOX). |
+| **Audit Trail** | Append-only DB Logs | Provides an immutable event stream demonstrating audit-trail patterns modeled on regulated-industry requirements. |
 | **Backend API** | FastAPI | Asynchronous I/O, automatic OpenAPI documentation, and strict Pydantic data validation schemas. |
 | **Dashboard** | Streamlit | Rapid, reactive UI rendering with interactive audit logs and status metrics. |
 
