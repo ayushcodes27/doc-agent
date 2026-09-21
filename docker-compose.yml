@@ -15,7 +15,9 @@ services:
     depends_on: 
       - postgres
       - redis
-    command: uvicorn api.main:app --host 0.0.0.0 --port 8000
+    volumes:
+      - .:/app
+    command: uvicorn api.main:app --host 0.0.0.0 --port 8000 --reload
 
   ui:
     build: .
@@ -25,7 +27,9 @@ services:
       - API_URL=http://api:8000
     depends_on:
       - api
-    command: streamlit run ui/app.py --server.address 0.0.0.0
+    volumes:
+      - .:/app
+    command: streamlit run ui/app.py --server.address 0.0.0.0 --server.runOnSave true
 
   postgres:
     image: postgres:16-alpine
@@ -45,3 +49,4 @@ services:
 
 volumes:
   pgdata:
+

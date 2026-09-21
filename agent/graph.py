@@ -13,6 +13,22 @@ from agent.nodes import (
 )
 
 
+def route_after_extract(state: AgentState) -> str:
+    """Route back to extract if extraction failed, up to 2 retries."""
+    error = state.get("extraction_error")
+    retries = state.get("extraction_retries", 0)
+    if error and retries < 2:
+        return "extract"
+    return "validate"
+
+
+def route_after_dedup(state: AgentState) -> str:
+    """Short-circuit to decide if duplicate detected."""
+    if state.get("is_duplicate"):
+        return "decide"
+    return "anomaly_check"
+
+
 def build_workflow():
     """
     Constructs and compiles the LangGraph StateGraph workflow for DocAgent invoice processing.
@@ -30,9 +46,15 @@ def build_workflow():
 
     # 2. Define execution flow & sequence
     workflow.set_entry_point("extract")
-    workflow.add_edge("extract", "validate")
+    
+    # Extraction loop (self-correction)
+    workflow.add_conditional_edges("extract", route_after_extract)
+    
     workflow.add_edge("validate", "dedup")
-    workflow.add_edge("dedup", "anomaly_check")
+    
+    # Early-exit branch
+    workflow.add_conditional_edges("dedup", route_after_dedup)
+    
     workflow.add_edge("anomaly_check", "risk_score")
     workflow.add_edge("risk_score", "decide")
     workflow.add_edge("decide", "report")
@@ -59,6 +81,8 @@ def run_docagent(document_text: str, document_path: str = "document.pdf") -> Dic
         "decision": "pending",
         "decision_reasoning": "",
         "approval_level": "auto",
+        "extraction_retries": 0,
+        "extraction_error": None,
         "audit_trail": [],
         "messages": [],
     }

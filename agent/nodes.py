@@ -41,7 +41,8 @@ def extract_data(state: Dict[str, Any]) -> Dict[str, Any]:
         extracted: ExtractedInvoice = extract_invoice_data(
             document_text=doc_text,
             document_bytes=doc_bytes,
-            mime_type=mime_type
+            mime_type=mime_type,
+            previous_error=state.get("extraction_error")
         )
         # Convert ExtractedInvoice Pydantic model to dict safely serializable to JSON
         extracted_dict = json.loads(extracted.model_dump_json())
@@ -56,14 +57,18 @@ def extract_data(state: Dict[str, Any]) -> Dict[str, Any]:
         return {
             "extracted_data": extracted_dict,
             "extraction_confidence": confidence,
+            "extraction_error": None, # Clear error on success
             "audit_trail": audit_trail,
         }
     except Exception as exc:
-        logger.warning(f"LLM extraction node exception: {exc}")
-        _log_audit(audit_trail, "extraction", f"Extraction error/fallback: {str(exc)}")
+        retries = state.get("extraction_retries", 0) + 1
+        logger.warning(f"LLM extraction node exception (Attempt {retries}): {exc}")
+        _log_audit(audit_trail, "extraction", f"Extraction error (Attempt {retries}): {str(exc)}")
         return {
-            "extracted_data": state.get("extracted_data"),
-            "extraction_confidence": state.get("extraction_confidence", 0.0),
+            "extracted_data": None,
+            "extraction_confidence": 0.0,
+            "extraction_error": str(exc),
+            "extraction_retries": retries,
             "audit_trail": audit_trail,
         }
 
@@ -189,6 +194,7 @@ def calculate_risk(state: Dict[str, Any]) -> Dict[str, Any]:
 
 def make_decision(state: Dict[str, Any]) -> Dict[str, Any]:
     """Node: Determine automated decision (auto_approve, flag_review, reject) and level."""
+    from langgraph.types import interrupt
     audit_trail = list(state.get("audit_trail", []))
     risk_score = float(state.get("risk_score", 0.0))
     is_duplicate = state.get("is_duplicate", False)
@@ -224,10 +230,23 @@ def make_decision(state: Dict[str, Any]) -> Dict[str, Any]:
         level = "auto"
         reason = f"Low risk score ({risk_score:.2f}) and total amount within limits."
 
+    if decision == "flag_review":
+        _log_audit(
+            audit_trail,
+            "decision_pause",
+            f"Decision: FLAGGED FOR REVIEW | Level: {level.upper()} | {reason} | Pausing graph for human input."
+        )
+        # Pause execution and wait for human input via Command(resume=...)
+        human_input = interrupt({"decision": decision, "reasoning": reason, "approval_level": level})
+        
+        if human_input:
+            decision = human_input.get("decision", decision)
+            reason = f"Human override: {human_input.get('reasoning', 'No reason provided')}"
+
     _log_audit(
         audit_trail,
         "decision",
-        f"Decision: {decision.upper()} | Level: {level.upper()} | {reason}"
+        f"Final Decision: {decision.upper()} | Level: {level.upper()} | {reason}"
     )
 
     return {

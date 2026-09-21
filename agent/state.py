@@ -12,6 +12,10 @@ class AgentState(TypedDict):
     document_bytes: Optional[bytes]
     mime_type: Optional[str]
 
+    # Extraction Loop State
+    extraction_retries: int
+    extraction_error: Optional[str]
+
     # Extracted data
     extracted_data: Optional[Dict[str, Any]]
     extraction_confidence: float

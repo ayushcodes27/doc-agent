@@ -448,228 +448,7 @@ if uploaded_file is not None and process_clicked:
             response = requests.post(f"{API_URL}/process", files=files, timeout=60)
 
             if response.status_code == 200:
-                result = response.json()
-
-                decision = result.get("decision", "unknown")
-                risk_score = float(result.get("risk_score", 0.0) or 0.0)
-                level = result.get("approval_level", "unknown").upper()
-                reasoning = result.get("reasoning", "No reasoning provided.")
-
-                decision_map = {
-                    "auto_approve": ("approve", "Auto-approved"),
-                    "flag_review": ("flag", "Flagged for review"),
-                    "reject": ("reject", "Rejected"),
-                }
-                css_class, status_label = decision_map.get(decision, ("", "Decision pending"))
-
-                st.markdown(
-                    f"""
-                    <div class="verdict {css_class}">
-                        <div class="verdict-top">
-                            <div class="verdict-status">{esc(status_label)}</div>
-                            <div class="verdict-gauge">
-                                <div class="gauge-header">
-                                    <span class="gauge-label">Risk score: {risk_score:.0%}</span>
-                                    <span class="verdict-level">{esc(level)}</span>
-                                </div>
-                                <div class="gauge-track-container">
-                                    <div class="gauge-track">
-                                        <div class="gauge-threshold" style="left: 30%;" title="Auto-approve cutoff (30%)"></div>
-                                        <div class="gauge-threshold" style="left: 70%;" title="Review cutoff (70%)"></div>
-                                        <div class="gauge-fill" style="width:{max(0, min(risk_score, 1)) * 100:.0f}%"></div>
-                                    </div>
-                                    <div class="gauge-scale">
-                                        <span>0% Safe</span>
-                                        <span style="left:30%; position:absolute; transform:translateX(-50%);">30% Auto</span>
-                                        <span style="left:70%; position:absolute; transform:translateX(-50%);">70% Review</span>
-                                        <span>100% Risk</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="verdict-reasoning">{esc(reasoning)}</div>
-                    </div>
-                    """,
-                    unsafe_allow_html=True,
-                )
-
-                col1, col2 = st.columns([1.1, 1])
-
-                # ---------------- Extracted data ----------------
-                with col1:
-                    st.markdown('<p class="section-title">Extracted data</p>', unsafe_allow_html=True)
-                    invoice_data = result.get("invoice")
-
-                    if invoice_data:
-                        currency = invoice_data.get("currency", "USD")
-                        confidence = invoice_data.get("confidence_score")
-                        if confidence is not None:
-                            try:
-                                st.markdown(
-                                    f'<span class="confidence-tag">{float(confidence):.0%} extraction confidence</span>',
-                                    unsafe_allow_html=True,
-                                )
-                            except (TypeError, ValueError):
-                                pass
-
-                        header_fields = [
-                            ("Vendor", invoice_data.get("vendor_name")),
-                            ("Vendor ID", invoice_data.get("vendor_id")),
-                            ("Invoice number", invoice_data.get("invoice_number")),
-                            ("Invoice date", invoice_data.get("invoice_date")),
-                            ("Due date", invoice_data.get("due_date")),
-                            ("Payment terms", invoice_data.get("payment_terms")),
-                        ]
-                        rows_html = "".join(
-                            f'<div class="ledger-row"><span class="ledger-label">{esc(label)}</span>'
-                            f'<span class="ledger-value">{esc(value) if value not in (None, "") else "—"}</span></div>'
-                            for label, value in header_fields
-                        )
-                        st.markdown(rows_html, unsafe_allow_html=True)
-
-                        line_items = invoice_data.get("line_items", [])
-                        if line_items:
-                            rows = ""
-                            for item in line_items:
-                                qty = item.get("quantity", "")
-                                unit_price = item.get("unit_price")
-                                total = item.get("total")
-                                rows += (
-                                    "<tr>"
-                                    f'<td>{esc(item.get("description", ""))}</td>'
-                                    f'<td class="num">{esc(qty)}</td>'
-                                    f'<td class="num">{fmt_money(unit_price, currency) if unit_price is not None else "—"}</td>'
-                                    f'<td class="num">{fmt_money(total, currency) if total is not None else "—"}</td>'
-                                    "</tr>"
-                                )
-                            st.markdown(
-                                f"""
-                                <table class="items-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Description</th>
-                                            <th class="num">Qty</th>
-                                            <th class="num">Unit price</th>
-                                            <th class="num">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>{rows}</tbody>
-                                </table>
-                                """,
-                                unsafe_allow_html=True,
-                            )
-
-                        totals_html = '<div class="totals-block">'
-                        if invoice_data.get("subtotal") is not None:
-                            totals_html += (
-                                '<div class="totals-row"><span class="t-label">Subtotal</span>'
-                                f'<span class="t-value">{fmt_money(invoice_data.get("subtotal"), currency)}</span></div>'
-                            )
-                        if invoice_data.get("tax_amount") is not None:
-                            totals_html += (
-                                '<div class="totals-row"><span class="t-label">Tax</span>'
-                                f'<span class="t-value">{fmt_money(invoice_data.get("tax_amount"), currency)}</span></div>'
-                            )
-                        if invoice_data.get("total_amount") is not None:
-                            totals_html += (
-                                '<div class="totals-row grand"><span class="t-label">Total</span>'
-                                f'<span class="t-value">{fmt_money(invoice_data.get("total_amount"), currency)}</span></div>'
-                            )
-                        totals_html += "</div>"
-                        st.markdown(totals_html, unsafe_allow_html=True)
-                    else:
-                        st.markdown(
-                            '<p style="color: var(--ink-soft); font-family: Inter, sans-serif; font-size: 0.88rem;">'
-                            "No data could be extracted from this document.</p>",
-                            unsafe_allow_html=True,
-                        )
-
-                # ---------------- Compliance & anomalies ----------------
-                with col2:
-                    st.markdown('<p class="section-title">Compliance & anomalies</p>', unsafe_allow_html=True)
-
-                    validations = result.get("validation_results", [])
-                    if not validations:
-                        st.markdown(
-                            '<p style="color: var(--ink-soft); font-family: Inter, sans-serif; font-size: 0.85rem;">'
-                            "No compliance checks were run.</p>",
-                            unsafe_allow_html=True,
-                        )
-                    else:
-                        failed_count = sum(1 for v in validations if not v.get("passed"))
-                        if failed_count > 0:
-                            issue_label = "issue needs" if failed_count == 1 else "issues need"
-                            st.markdown(
-                                f'<div class="compliance-alert fail">⚠️ {failed_count} {issue_label} review</div>',
-                                unsafe_allow_html=True,
-                            )
-                        else:
-                            st.markdown(
-                                '<div class="compliance-alert pass">✓ All compliance checks passed</div>',
-                                unsafe_allow_html=True,
-                            )
-
-                        checks_html = ""
-                        for v in validations:
-                            passed = v.get("passed")
-                            mark_class = "pass" if passed else "fail"
-                            row_class = "" if passed else "failed-row"
-                            mark_symbol = "✓" if passed else "✕"
-                            checks_html += (
-                                f'<div class="check-row {row_class}">'
-                                f'<div class="check-mark {mark_class}">{mark_symbol}</div>'
-                                "<div>"
-                                f'<div class="check-name">{esc(v.get("rule_name", "Rule"))}</div>'
-                                f'<div class="check-msg">{esc(v.get("message", ""))}</div>'
-                                "</div>"
-                                "</div>"
-                            )
-                        st.markdown(checks_html, unsafe_allow_html=True)
-
-                    st.markdown(
-                        '<p class="section-title" style="margin-top:1.6rem;">Anomalies & fraud detection</p>',
-                        unsafe_allow_html=True,
-                    )
-                    anomalies = result.get("anomalies", [])
-                    if anomalies:
-                        anomaly_html = "".join(
-                            f'<div class="anomaly-row"><span class="a-type">{esc(a.get("type"))}</span> — '
-                            f'{esc(a.get("message"))}</div>'
-                            for a in anomalies
-                        )
-                        st.markdown(anomaly_html, unsafe_allow_html=True)
-                    else:
-                        st.markdown(
-                            '<div class="anomaly-none">✓ No anomalies detected</div>',
-                            unsafe_allow_html=True,
-                        )
-
-                # ---------------- Audit trail ----------------
-                st.markdown('<p class="section-title" style="margin-top:2rem;">Agent audit trail</p>', unsafe_allow_html=True)
-                audit_trail = result.get("audit_trail", [])
-                with st.expander("Show step-by-step log", expanded=False):
-                    if not audit_trail:
-                        st.markdown(
-                            '<p style="color: var(--ink-soft); font-family: Inter, sans-serif; font-size: 0.85rem;">'
-                            "No audit events recorded.</p>",
-                            unsafe_allow_html=True,
-                        )
-                    else:
-                        items_html = ""
-                        total_entries = len(audit_trail)
-                        for idx, entry in enumerate(audit_trail):
-                            ts = (entry.get("timestamp") or "")[:19].replace("T", " ")
-                            is_terminal = (idx == total_entries - 1) or (entry.get("step") in ["decision", "report_generated"])
-                            terminal_class = "terminal" if is_terminal else ""
-                            items_html += (
-                                f'<div class="timeline-item {terminal_class}">'
-                                f'<div class="timeline-ts">{esc(ts)}</div>'
-                                f'<div class="timeline-step">{esc(step_label(entry.get("step", "")))}</div>'
-                                f'<div class="timeline-detail">{esc(entry.get("detail", ""))}</div>'
-                                "</div>"
-                            )
-                        st.markdown(f'<div class="timeline">{items_html}</div>', unsafe_allow_html=True)
-
+                st.session_state.result = response.json()
             else:
                 st.error(f"Error from server: {response.status_code}")
                 try:
@@ -681,6 +460,253 @@ if uploaded_file is not None and process_clicked:
             st.error(f"Could not connect to the backend API at {API_URL}. Is the FastAPI server running?")
         except Exception as e:
             st.error(f"An error occurred: {e}")
+
+if "result" in st.session_state:
+    result = st.session_state.result
+    
+    status = result.get("status", "completed")
+    thread_id = result.get("thread_id", "document.pdf")
+    decision = result.get("decision", "unknown")
+    risk_score = float(result.get("risk_score", 0.0) or 0.0)
+    level = result.get("approval_level", "unknown").upper()
+    reasoning = result.get("reasoning", "No reasoning provided.")
+
+    if status == "pending_review":
+        decision_map = {"flag_review": ("flag", "Pending Human Review")}
+    else:
+        decision_map = {
+            "auto_approve": ("approve", "Auto-approved"),
+            "flag_review": ("flag", "Flagged for review"),
+            "reject": ("reject", "Rejected"),
+        }
+    css_class, status_label = decision_map.get(decision, ("", "Decision pending"))
+
+    st.markdown(
+        f"""
+        <div class="verdict {css_class}">
+            <div class="verdict-top">
+                <div class="verdict-status">{esc(status_label)}</div>
+                <div class="verdict-gauge">
+                    <div class="gauge-header">
+                        <span class="gauge-label">Risk score: {risk_score:.0%}</span>
+                        <span class="verdict-level">{esc(level)}</span>
+                    </div>
+                    <div class="gauge-track-container">
+                        <div class="gauge-track">
+                            <div class="gauge-threshold" style="left: 30%;" title="Auto-approve cutoff (30%)"></div>
+                            <div class="gauge-threshold" style="left: 70%;" title="Review cutoff (70%)"></div>
+                            <div class="gauge-fill" style="width:{max(0, min(risk_score, 1)) * 100:.0f}%"></div>
+                        </div>
+                        <div class="gauge-scale">
+                            <span>0% Safe</span>
+                            <span style="left:30%; position:absolute; transform:translateX(-50%);">30% Auto</span>
+                            <span style="left:70%; position:absolute; transform:translateX(-50%);">70% Review</span>
+                            <span>100% Risk</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="verdict-reasoning">{esc(reasoning)}</div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    if status == "pending_review":
+        st.warning("⚠️ This invoice requires manual review. Please verify the anomalies/rules and provide a final decision.")
+        col_b1, col_b2, _ = st.columns([1, 1, 3])
+        with col_b1:
+            if st.button("✅ Approve Exception", type="primary", use_container_width=True):
+                with st.spinner("Resuming graph..."):
+                    res = requests.post(f"{API_URL}/resume/{thread_id}", json={"action": "approve"})
+                    if res.status_code == 200:
+                        st.session_state.result = res.json()
+                        st.rerun()
+        with col_b2:
+            if st.button("❌ Reject Invoice", use_container_width=True):
+                with st.spinner("Resuming graph..."):
+                    res = requests.post(f"{API_URL}/resume/{thread_id}", json={"action": "reject"})
+                    if res.status_code == 200:
+                        st.session_state.result = res.json()
+                        st.rerun()
+        st.markdown("<hr/>", unsafe_allow_html=True)
+
+    col1, col2 = st.columns([1.1, 1])
+
+    # ---------------- Extracted data ----------------
+    with col1:
+        st.markdown('<p class="section-title">Extracted data</p>', unsafe_allow_html=True)
+        invoice_data = result.get("invoice")
+
+        if invoice_data:
+            currency = invoice_data.get("currency", "USD")
+            confidence = invoice_data.get("confidence_score")
+            if confidence is not None:
+                try:
+                    st.markdown(
+                        f'<span class="confidence-tag">{float(confidence):.0%} extraction confidence</span>',
+                        unsafe_allow_html=True,
+                    )
+                except (TypeError, ValueError):
+                    pass
+
+            header_fields = [
+                ("Vendor", invoice_data.get("vendor_name")),
+                ("Vendor ID", invoice_data.get("vendor_id")),
+                ("Invoice number", invoice_data.get("invoice_number")),
+                ("Invoice date", invoice_data.get("invoice_date")),
+                ("Due date", invoice_data.get("due_date")),
+                ("Payment terms", invoice_data.get("payment_terms")),
+            ]
+            rows_html = "".join(
+                f'<div class="ledger-row"><span class="ledger-label">{esc(label)}</span>'
+                f'<span class="ledger-value">{esc(value) if value not in (None, "") else "—"}</span></div>'
+                for label, value in header_fields
+            )
+            st.markdown(rows_html, unsafe_allow_html=True)
+
+            line_items = invoice_data.get("line_items", [])
+            if line_items:
+                rows = ""
+                for item in line_items:
+                    qty = item.get("quantity", "")
+                    unit_price = item.get("unit_price")
+                    total = item.get("total")
+                    rows += (
+                        "<tr>"
+                        f'<td>{esc(item.get("description", ""))}</td>'
+                        f'<td class="num">{esc(qty)}</td>'
+                        f'<td class="num">{fmt_money(unit_price, currency) if unit_price is not None else "—"}</td>'
+                        f'<td class="num">{fmt_money(total, currency) if total is not None else "—"}</td>'
+                        "</tr>"
+                    )
+                st.markdown(
+                    f"""
+                    <table class="items-table">
+                        <thead>
+                            <tr>
+                                <th>Description</th>
+                                <th class="num">Qty</th>
+                                <th class="num">Unit price</th>
+                                <th class="num">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>{rows}</tbody>
+                    </table>
+                    """,
+                    unsafe_allow_html=True,
+                )
+
+            totals_html = '<div class="totals-block">'
+            if invoice_data.get("subtotal") is not None:
+                totals_html += (
+                    '<div class="totals-row"><span class="t-label">Subtotal</span>'
+                    f'<span class="t-value">{fmt_money(invoice_data.get("subtotal"), currency)}</span></div>'
+                )
+            if invoice_data.get("tax_amount") is not None:
+                totals_html += (
+                    '<div class="totals-row"><span class="t-label">Tax</span>'
+                    f'<span class="t-value">{fmt_money(invoice_data.get("tax_amount"), currency)}</span></div>'
+                )
+            if invoice_data.get("total_amount") is not None:
+                totals_html += (
+                    '<div class="totals-row grand"><span class="t-label">Total</span>'
+                    f'<span class="t-value">{fmt_money(invoice_data.get("total_amount"), currency)}</span></div>'
+                )
+            totals_html += "</div>"
+            st.markdown(totals_html, unsafe_allow_html=True)
+        else:
+            st.markdown(
+                '<p style="color: var(--ink-soft); font-family: Inter, sans-serif; font-size: 0.88rem;">'
+                "No data could be extracted from this document.</p>",
+                unsafe_allow_html=True,
+            )
+
+    # ---------------- Compliance & anomalies ----------------
+    with col2:
+        st.markdown('<p class="section-title">Compliance & anomalies</p>', unsafe_allow_html=True)
+
+        validations = result.get("validation_results", [])
+        if not validations:
+            st.markdown(
+                '<p style="color: var(--ink-soft); font-family: Inter, sans-serif; font-size: 0.85rem;">'
+                "No compliance checks were run.</p>",
+                unsafe_allow_html=True,
+            )
+        else:
+            failed_count = sum(1 for v in validations if not v.get("passed"))
+            if failed_count > 0:
+                issue_label = "issue needs" if failed_count == 1 else "issues need"
+                st.markdown(
+                    f'<div class="compliance-alert fail">⚠️ {failed_count} {issue_label} review</div>',
+                    unsafe_allow_html=True,
+                )
+            else:
+                st.markdown(
+                    '<div class="compliance-alert pass">✓ All compliance checks passed</div>',
+                    unsafe_allow_html=True,
+                )
+
+            checks_html = ""
+            for v in validations:
+                passed = v.get("passed")
+                mark_class = "pass" if passed else "fail"
+                row_class = "" if passed else "failed-row"
+                mark_symbol = "✓" if passed else "✕"
+                checks_html += (
+                    f'<div class="check-row {row_class}">'
+                    f'<div class="check-mark {mark_class}">{mark_symbol}</div>'
+                    "<div>"
+                    f'<div class="check-name">{esc(v.get("rule_name", "Rule"))}</div>'
+                    f'<div class="check-msg">{esc(v.get("message", ""))}</div>'
+                    "</div>"
+                    "</div>"
+                )
+            st.markdown(checks_html, unsafe_allow_html=True)
+
+        st.markdown(
+            '<p class="section-title" style="margin-top:1.6rem;">Anomalies & fraud detection</p>',
+            unsafe_allow_html=True,
+        )
+        anomalies = result.get("anomalies", [])
+        if anomalies:
+            anomaly_html = "".join(
+                f'<div class="anomaly-row"><span class="a-type">{esc(a.get("type"))}</span> — '
+                f'{esc(a.get("message"))}</div>'
+                for a in anomalies
+            )
+            st.markdown(anomaly_html, unsafe_allow_html=True)
+        else:
+            st.markdown(
+                '<div class="anomaly-none">✓ No anomalies detected</div>',
+                unsafe_allow_html=True,
+            )
+
+    # ---------------- Audit trail ----------------
+    st.markdown('<p class="section-title" style="margin-top:2rem;">Agent audit trail</p>', unsafe_allow_html=True)
+    audit_trail = result.get("audit_trail", [])
+    with st.expander("Show step-by-step log", expanded=False):
+        if not audit_trail:
+            st.markdown(
+                '<p style="color: var(--ink-soft); font-family: Inter, sans-serif; font-size: 0.85rem;">'
+                "No audit events recorded.</p>",
+                unsafe_allow_html=True,
+            )
+        else:
+            items_html = ""
+            total_entries = len(audit_trail)
+            for idx, entry in enumerate(audit_trail):
+                ts = (entry.get("timestamp") or "")[:19].replace("T", " ")
+                is_terminal = (idx == total_entries - 1) and status == "completed" and entry.get("step") in ["decision", "report_generated"]
+                terminal_class = "terminal" if is_terminal else ""
+                items_html += (
+                    f'<div class="timeline-item {terminal_class}">'
+                    f'<div class="timeline-ts">{esc(ts)}</div>'
+                    f'<div class="timeline-step">{esc(step_label(entry.get("step", "")))}</div>'
+                    f'<div class="timeline-detail">{esc(entry.get("detail", ""))}</div>'
+                    "</div>"
+                )
+            st.markdown(f'<div class="timeline">{items_html}</div>', unsafe_allow_html=True)
 
 else:
     # ----------------------------------------------------------------------------
