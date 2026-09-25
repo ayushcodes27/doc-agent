@@ -15,7 +15,7 @@
 ## 🏛️ System Architecture
 
 <div align="center">
-  <img src="architect.png" alt="DocAgent System Architecture" width="850"/>
+  <img src="images/architect.png" alt="DocAgent System Architecture" width="850"/>
 </div>
 
 <details>
