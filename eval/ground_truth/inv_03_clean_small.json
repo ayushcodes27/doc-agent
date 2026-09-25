@@ -1,0 +1,57 @@
+{
+    "vendor_name": "Logitech",
+    "vendor_id": "29AALCL4821P1Z8",
+    "invoice_number": "LOG-OFF-78126",
+    "invoice_date": "2026-09-18",
+    "due_date": "2026-10-03",
+    "currency": "INR",
+    "subtotal": 9500.0,
+    "tax_amount": 0.0,
+    "total_amount": 9500.0,
+    "visual_amount": null,
+    "visual_discrepancy_detected": false,
+    "visual_notes": null,
+    "line_items": [
+        {
+            "description": "Wireless keyboard (K-series equivalent)",
+            "quantity": 5.0,
+            "unit_price": 1050.0,
+            "total": 5250.0
+        },
+        {
+            "description": "Optical wireless mouse",
+            "quantity": 4.0,
+            "unit_price": 650.0,
+            "total": 2600.0
+        },
+        {
+            "description": "HD business webcam",
+            "quantity": 1.0,
+            "unit_price": 1200.0,
+            "total": 1200.0
+        },
+        {
+            "description": "USB-C presentation mouse",
+            "quantity": 1.0,
+            "unit_price": 450.0,
+            "total": 450.0
+        }
+    ],
+    "payment_terms": "Net 15",
+    "confidence_score": 0.98,
+    "expected_validations": {
+        "max_amount": "pass",
+        "approved_vendor": "pass",
+        "date_validity": "pass",
+        "line_item_math": "pass",
+        "total_math": "pass",
+        "visual_text_consistency": "pass",
+        "vendor_id_present": "pass",
+        "payment_terms_check": "pass",
+        "currency_consistency": "pass"
+    },
+    "expected_anomalies": [],
+    "expected_decision": "auto_approve",
+    "expected_approval_level": "auto",
+    "test_category": "Clean small office-equipment purchase with bullet-style line items"
+}

@@ -1,0 +1,22 @@
+BLUE DART EXPRESS LTD
+Express Logistics & Distribution
+Plot 11, Transit Park, Navi Mumbai - 400705
+GSTIN: 27AABCB6620T1Z0
+Phone: +91-22-4800-2201 | accounts@bluedart-example.in
+
+                           TAX INVOICE
+Invoice Number : BD-260925-18
+Invoice Date   : 25th September, 2026
+Due Date       : 25/10/2026
+Currency       : ₹
+Payment Terms  : Net 30
+Bill To        : Silverline Components Pvt Ltd, Pune - 411038
+
+Priority parcel delivery                 8      ₹1,250.00      ₹10,000.00
+Regional freight service                 4      ₹2,000.00       ₹8,000.00
+Packaging and handling                   1      ₹1,500.00       ₹1,500.00
+-----------------------------------------------------------------------
+Subtotal                                                         ₹19,500.00
+GST @ 10%                                                        ₹1,950.00
+TOTAL                                                           ₹21,450.00
+-----------------------------------------------------------------------

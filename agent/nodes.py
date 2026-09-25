@@ -201,6 +201,8 @@ def make_decision(state: Dict[str, Any]) -> Dict[str, Any]:
     extracted_data = state.get("extracted_data") or {}
     total_amount = float(extracted_data.get("total_amount", 0.0) or 0.0)
 
+    visual_tampering = any(a.get("type") == "visual_text_mismatch" for a in state.get("anomalies", []))
+
     if not extracted_data:
         decision = "reject"
         level = "auto"
@@ -209,11 +211,15 @@ def make_decision(state: Dict[str, Any]) -> Dict[str, Any]:
         decision = "reject"
         level = "auto"
         reason = "Duplicate invoice detected with matching vendor, invoice number, and total amount."
+    elif visual_tampering:
+        decision = "reject"
+        level = "auto"
+        reason = "Rejection: Critical document tampering alert — embedded scanned copy amount conflicts with digital line items."
     elif risk_score >= 0.70:
         decision = "reject"
         level = "auto"
         reason = f"High risk score ({risk_score:.2f}) exceeds rejection threshold (0.70)."
-    elif risk_score >= 0.40:
+    elif risk_score >= 0.25:
         decision = "flag_review"
         level = "director" if (total_amount > 200000.0 or risk_score >= 0.60) else "manager"
         reason = f"Moderate risk score ({risk_score:.2f}) requires human review by {level.title()}."
@@ -237,11 +243,14 @@ def make_decision(state: Dict[str, Any]) -> Dict[str, Any]:
             f"Decision: FLAGGED FOR REVIEW | Level: {level.upper()} | {reason} | Pausing graph for human input."
         )
         # Pause execution and wait for human input via Command(resume=...)
-        human_input = interrupt({"decision": decision, "reasoning": reason, "approval_level": level})
-        
-        if human_input:
-            decision = human_input.get("decision", decision)
-            reason = f"Human override: {human_input.get('reasoning', 'No reason provided')}"
+        try:
+            human_input = interrupt({"decision": decision, "reasoning": reason, "approval_level": level})
+            if human_input:
+                decision = human_input.get("decision", decision)
+                reason = f"Human override: {human_input.get('reasoning', 'No reason provided')}"
+        except RuntimeError:
+            # Standalone execution / unit test outside of LangGraph runner
+            human_input = None
 
     _log_audit(
         audit_trail,

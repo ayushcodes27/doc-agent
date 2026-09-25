@@ -1,0 +1,60 @@
+{
+    "vendor_name": "Microsoft Azure",
+    "vendor_id": "33AAMSA9201F1ZP",
+    "invoice_number": "AZ-100000-26",
+    "invoice_date": "2026-09-05",
+    "due_date": "2026-10-05",
+    "currency": "INR",
+    "subtotal": 74074.07,
+    "tax_amount": 25925.93,
+    "total_amount": 100000.0,
+    "visual_amount": null,
+    "visual_discrepancy_detected": false,
+    "visual_notes": null,
+    "line_items": [
+        {
+            "description": "Azure compute capacity",
+            "quantity": 1.0,
+            "unit_price": 37000.0,
+            "total": 37000.0
+        },
+        {
+            "description": "Managed database",
+            "quantity": 1.0,
+            "unit_price": 20000.0,
+            "total": 20000.0
+        },
+        {
+            "description": "Storage and networking",
+            "quantity": 1.0,
+            "unit_price": 10000.0,
+            "total": 10000.0
+        },
+        {
+            "description": "Support plan",
+            "quantity": 1.0,
+            "unit_price": 7074.07,
+            "total": 7074.07
+        }
+    ],
+    "payment_terms": "Net 30",
+    "confidence_score": 0.98,
+    "expected_validations": {
+        "max_amount": "pass",
+        "approved_vendor": "pass",
+        "date_validity": "pass",
+        "line_item_math": "pass",
+        "total_math": "pass",
+        "visual_text_consistency": "pass",
+        "vendor_id_present": "pass",
+        "payment_terms_check": "pass",
+        "currency_consistency": "pass"
+    },
+    "expected_anomalies": [
+        "high_tax_ratio",
+        "threshold_avoidance"
+    ],
+    "expected_decision": "flag_review",
+    "expected_approval_level": "manager",
+    "test_category": "Stacked round-number, high-tax-ratio, and threshold-avoidance anomalies"
+}

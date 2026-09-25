@@ -42,21 +42,30 @@ class InMemoryDuplicateCache:
 
 _in_memory_cache = InMemoryDuplicateCache()
 _redis_client = None
+_last_redis_check = 0.0
+_REDIS_RETRY_INTERVAL = 30.0  # seconds cooldown before retrying Redis connection
 
 
 def get_redis_client():
-    """Get Redis client instance or return None if unavailable."""
-    global _redis_client
+    """Get Redis client instance or return None if unavailable (with retry cooldown)."""
+    global _redis_client, _last_redis_check
     if not REDIS_AVAILABLE:
         return None
-    if _redis_client is None:
-        try:
-            client = redis.from_url(settings.REDIS_URL, socket_connect_timeout=1)
-            client.ping()
-            _redis_client = client
-        except Exception as e:
-            logger.warning(f"Redis unavailable, falling back to in-memory duplicate cache: {e}")
-            _redis_client = None
+    if _redis_client is not None:
+        return _redis_client
+    
+    now = time.time()
+    if now - _last_redis_check < _REDIS_RETRY_INTERVAL:
+        return None
+        
+    _last_redis_check = now
+    try:
+        client = redis.from_url(settings.REDIS_URL, socket_connect_timeout=0.5)
+        client.ping()
+        _redis_client = client
+    except Exception as e:
+        logger.warning(f"Redis unavailable, falling back to in-memory duplicate cache: {e}")
+        _redis_client = None
     return _redis_client
 
 

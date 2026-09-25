@@ -1,0 +1,19 @@
+TATA CONSULTANCY SERVICES
+Digital Engineering Services
+19 Innovation Avenue, Chennai - 600096
+GSTIN: 33AABCT1234E1Z5
+----------------------------------------------------------------------
+TAX INVOICE
+Invoice No. TCS-INV-260901
+Date: 01-Sep-2026      Due: 01-Oct-2026      Terms: Net 30
+Bill To: Vertex Manufacturing Ltd, Pune - 411019
+Currency: INR
+
+1. Cloud modernization program             1 x Rs. 350,000.00 = Rs. 350,000.00
+2. Application development services       1 x Rs. 200,000.00 = Rs. 200,000.00
+3. Program management                     1 x Rs.  40,000.00 = Rs.  40,000.00
+----------------------------------------------------------------------
+Subtotal                                                       590,000.00
+GST @ 10%                                                      59,000.00
+TOTAL                                                         649,000.00
+----------------------------------------------------------------------

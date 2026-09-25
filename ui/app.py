@@ -558,6 +558,21 @@ if "result" in st.session_state:
                 ("Due date", invoice_data.get("due_date")),
                 ("Payment terms", invoice_data.get("payment_terms")),
             ]
+
+            visual_amt = invoice_data.get("visual_amount")
+            visual_disc = invoice_data.get("visual_discrepancy_detected")
+            if visual_amt is not None or visual_disc:
+                v_str = fmt_money(visual_amt, currency) if visual_amt is not None else "Discrepant"
+                t_str = fmt_money(invoice_data.get("total_amount"), currency)
+                st.markdown(
+                    f'<div class="compliance-alert fail" style="margin-bottom:0.8rem;">'
+                    f'🚨 <strong>Visual Tampering Alert:</strong> Scanned copy displays <strong>{v_str}</strong>, '
+                    f'which conflicts with textual line items total (<strong>{t_str}</strong>)!'
+                    f'</div>',
+                    unsafe_allow_html=True,
+                )
+                header_fields.append(("Scanned copy total", v_str))
+
             rows_html = "".join(
                 f'<div class="ledger-row"><span class="ledger-label">{esc(label)}</span>'
                 f'<span class="ledger-value">{esc(value) if value not in (None, "") else "—"}</span></div>'

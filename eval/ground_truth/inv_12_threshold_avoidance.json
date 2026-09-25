@@ -1,0 +1,53 @@
+{
+    "vendor_name": "Atlassian Pty Ltd",
+    "vendor_id": "29AATLA7812R1Z4",
+    "invoice_number": "ATL-SEP-995",
+    "invoice_date": "2026-09-09",
+    "due_date": "2026-10-09",
+    "currency": "INR",
+    "subtotal": 95000.0,
+    "tax_amount": 4500.0,
+    "total_amount": 99500.0,
+    "visual_amount": null,
+    "visual_discrepancy_detected": false,
+    "visual_notes": null,
+    "line_items": [
+        {
+            "description": "Jira Enterprise subscription",
+            "quantity": 1.0,
+            "unit_price": 60000.0,
+            "total": 60000.0
+        },
+        {
+            "description": "Confluence Enterprise subscription",
+            "quantity": 1.0,
+            "unit_price": 30000.0,
+            "total": 30000.0
+        },
+        {
+            "description": "Premium support",
+            "quantity": 1.0,
+            "unit_price": 5000.0,
+            "total": 5000.0
+        }
+    ],
+    "payment_terms": "Net 30",
+    "confidence_score": 0.98,
+    "expected_validations": {
+        "max_amount": "pass",
+        "approved_vendor": "pass",
+        "date_validity": "pass",
+        "line_item_math": "pass",
+        "total_math": "pass",
+        "visual_text_consistency": "pass",
+        "vendor_id_present": "pass",
+        "payment_terms_check": "pass",
+        "currency_consistency": "pass"
+    },
+    "expected_anomalies": [
+        "threshold_avoidance"
+    ],
+    "expected_decision": "flag_review",
+    "expected_approval_level": "manager",
+    "test_category": "Invoice deliberately just below the 100000 manager-review threshold"
+}

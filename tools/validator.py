@@ -16,14 +16,33 @@ class ValidationResult:
 
 
 DEFAULT_APPROVED_VENDORS = [
+    # Indian IT & Consulting
     "Acme Tech Solutions Pvt Ltd",
-    "Acme Corp",
-    "Global Tech Supplies",
-    "Cloud Services Inc",
-    "Office Depot",
-    "Logitech",
-    "Dell",
+    "Infosys Limited",
+    "Tata Consultancy Services",
+    "Wipro Technologies",
+    "HCL Technologies",
+    "Tech Mahindra",
+    # Cloud & SaaS Providers
     "Amazon Web Services",
+    "Google Cloud Platform",
+    "Microsoft Azure",
+    "Salesforce Inc",
+    "Atlassian Pty Ltd",
+    # Hardware & Office Supplies
+    "Dell Technologies",
+    "Lenovo India Pvt Ltd",
+    "HP Inc",
+    "Logitech",
+    "Office Depot",
+    # Professional Services
+    "Deloitte Touche Tohmatsu",
+    "Ernst & Young LLP",
+    "KPMG Advisory Services",
+    # Logistics & Facilities
+    "Blue Dart Express Ltd",
+    "FedEx India",
+    "Sodexo India Services",
 ]
 
 DEFAULT_COMPLIANCE_RULES = [
@@ -51,6 +70,26 @@ DEFAULT_COMPLIANCE_RULES = [
     {
         "name": "total_math",
         "description": "Subtotal + Tax Amount must equal Total Amount (±1% tolerance)",
+        "severity": "warning",
+    },
+    {
+        "name": "visual_text_consistency",
+        "description": "Embedded scanned image amount must match digital line-item total",
+        "severity": "error",
+    },
+    {
+        "name": "vendor_id_present",
+        "description": "Vendor must provide a valid tax/registration ID (GSTIN, VAT, etc.)",
+        "severity": "warning",
+    },
+    {
+        "name": "payment_terms_check",
+        "description": "Invoice must specify payment terms",
+        "severity": "info",
+    },
+    {
+        "name": "currency_consistency",
+        "description": "Currency must be a recognized ISO 4217 code",
         "severity": "warning",
     },
 ]
@@ -188,6 +227,107 @@ def validate_invoice(
                         f"Subtotal ({subtotal:,.2f}) + Tax ({tax_amount:,.2f}) matches Total ({total_amount:,.2f})."
                         if passed
                         else f"Subtotal ({subtotal:,.2f}) + Tax ({tax_amount:,.2f}) = {expected_total:,.2f}, which does not match Total ({total_amount:,.2f})."
+                    ),
+                    severity=severity,
+                )
+            )
+
+        elif rule_name == "visual_text_consistency":
+            visual_amount = _get_field(invoice, "visual_amount")
+            discrepancy_detected = bool(_get_field(invoice, "visual_discrepancy_detected", False))
+            visual_notes = _get_field(invoice, "visual_notes", "")
+
+            has_conflict = False
+            diff = 0.0
+            if visual_amount is not None:
+                try:
+                    v_val = float(visual_amount)
+                    diff = abs(v_val - total_amount)
+                    tolerance = max(abs(total_amount) * 0.01, 1.0)
+                    if diff > tolerance:
+                        has_conflict = True
+                except (ValueError, TypeError):
+                    pass
+
+            if has_conflict:
+                v_formatted = f"{float(visual_amount):,.2f}"
+                note_suffix = f" Details: {visual_notes}" if visual_notes else ""
+                results.append(
+                    ValidationResult(
+                        passed=False,
+                        rule_name=rule_name,
+                        message=(
+                            f"CRITICAL DISCREPANCY: Scanned copy amount ({v_formatted}) conflicts with "
+                            f"digital line-item total ({total_amount:,.2f}) — difference of {diff:,.2f}.{note_suffix}"
+                        ),
+                        severity=severity,
+                    )
+                )
+            elif discrepancy_detected:
+                results.append(
+                    ValidationResult(
+                        passed=False,
+                        rule_name=rule_name,
+                        message=f"CRITICAL DISCREPANCY: Discrepancy detected between embedded scanned copy and digital text. {visual_notes or ''}".strip(),
+                        severity=severity,
+                    )
+                )
+            else:
+                results.append(
+                    ValidationResult(
+                        passed=True,
+                        rule_name=rule_name,
+                        message="Visual scan amount is consistent with digital text line items.",
+                        severity=severity,
+                    )
+                )
+
+        elif rule_name == "vendor_id_present":
+            vendor_id = _get_field(invoice, "vendor_id")
+            has_id = bool(vendor_id and str(vendor_id).strip())
+            results.append(
+                ValidationResult(
+                    passed=has_id,
+                    rule_name=rule_name,
+                    message=(
+                        f"Vendor ID/GSTIN present: '{vendor_id}'."
+                        if has_id
+                        else "Vendor did not provide a tax/registration ID (GSTIN, VAT, etc.)."
+                    ),
+                    severity=severity,
+                )
+            )
+
+        elif rule_name == "payment_terms_check":
+            payment_terms = _get_field(invoice, "payment_terms")
+            has_terms = bool(payment_terms and str(payment_terms).strip())
+            results.append(
+                ValidationResult(
+                    passed=has_terms,
+                    rule_name=rule_name,
+                    message=(
+                        f"Payment terms specified: '{payment_terms}'."
+                        if has_terms
+                        else "No payment terms specified on this invoice."
+                    ),
+                    severity=severity,
+                )
+            )
+
+        elif rule_name == "currency_consistency":
+            currency = str(_get_field(invoice, "currency", "") or "").strip().upper()
+            valid_currencies = {
+                "INR", "USD", "EUR", "GBP", "JPY", "AUD", "CAD", "SGD", "AED", "CHF",
+            }
+            is_valid = currency in valid_currencies
+            results.append(
+                ValidationResult(
+                    passed=is_valid,
+                    rule_name=rule_name,
+                    message=(
+                        f"Currency '{currency}' is a recognized ISO 4217 code."
+                        if is_valid
+                        else f"Currency '{currency}' is not in the recognized currency list."
                     ),
                     severity=severity,
                 )

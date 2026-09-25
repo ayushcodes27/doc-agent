@@ -65,8 +65,8 @@ def detect_anomalies(
                 "score": 0.5,
             })
 
-    # 2. Suspicious Round Number Anomaly
-    if total_amount >= 10000.0 and total_amount % 1000.0 == 0.0:
+    # 2. Suspicious Round Number Anomaly (e.g. flat round fee >= 50k with no tax or round multiple)
+    if total_amount >= 50000.0 and total_amount % 10000.0 == 0.0 and (tax_amount == 0.0 or total_amount == subtotal):
         anomalies.append({
             "type": "round_number",
             "message": f"Suspiciously round invoice total amount: {total_amount:,.2f}",
@@ -85,14 +85,45 @@ def detect_anomalies(
                 "score": min(round(tax_ratio, 2), 1.0),
             })
 
-    # 4. Threshold Avoidance (Structuring)
+    # 4. Threshold Avoidance (Structuring just below 100k or 200k approval tiers)
     for cap in [100000.0, 200000.0]:
-        if cap * 0.98 <= total_amount < cap:
+        if cap * 0.98 <= total_amount <= cap:
             anomalies.append({
                 "type": "threshold_avoidance",
                 "message": f"Amount ({total_amount:,.2f}) is suspiciously close to the {cap:,.2f} approval limit (structuring pattern).",
-                "severity": "error",
-                "score": 0.8,
+                "severity": "warning",
+                "score": 0.50,
             })
+
+    # 5. Dual-Layer Discrepancy / Document Tampering
+    visual_amount = _get_field(invoice, "visual_amount")
+    discrepancy_detected = bool(_get_field(invoice, "visual_discrepancy_detected", False))
+    visual_notes = _get_field(invoice, "visual_notes", "")
+
+    if visual_amount is not None:
+        try:
+            v_val = float(visual_amount)
+            diff = abs(v_val - total_amount)
+            tolerance = max(abs(total_amount) * 0.01, 1.0)
+            if diff > tolerance:
+                anomalies.append({
+                    "type": "visual_text_mismatch",
+                    "message": (
+                        f"Severe document tampering alert: Embedded visual scan shows {v_val:,.2f} "
+                        f"which conflicts with digital line items ({total_amount:,.2f}) by {diff:,.2f}."
+                        f"{f' ({visual_notes})' if visual_notes else ''}"
+                    ),
+                    "severity": "error",
+                    "score": 0.95,
+                })
+        except (ValueError, TypeError):
+            pass
+    elif discrepancy_detected:
+        anomalies.append({
+            "type": "visual_text_mismatch",
+            "message": f"Document tampering alert: Discrepancy detected between embedded visual image and digital text. {visual_notes or ''}".strip(),
+            "severity": "error",
+            "score": 0.95,
+        })
 
     return anomalies

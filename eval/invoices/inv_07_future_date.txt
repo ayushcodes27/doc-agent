@@ -1,0 +1,20 @@
+DELL TECHNOLOGIES
+Enterprise Hardware Division
+55 Lakefront Plaza, Bengaluru - 560103
+Tax ID: 29AABCD9988R1Z2
+
+                              INVOICE
+Invoice Number: DELL-FUT-2715
+Invoice Date: 15-Mar-2027
+Due Date: 14-Apr-2027
+Currency: INR
+Terms: Net 30
+Customer: Nova Systems India Pvt Ltd
+
+Server workstation package                 2    82,000.00    164,000.00
+Enterprise monitor                        4    18,000.00     72,000.00
+----------------------------------------------------------------------
+Subtotal                                                     236,000.00
+GST @ 10%                                                    23,600.00
+TOTAL                                                       259,600.00
+----------------------------------------------------------------------

@@ -1,0 +1,23 @@
+UNKNOWN CORP INTERNATIONAL
+Global Business Services
+91 Market Link Road, Mumbai - 400070
+Invoice No: UCI-494950
+Invoice Date: 02-Sep-2027
+Due Date: 02-Oct-2027
+Currency: INR
+Payment Terms: Net 30
+
+Bill To: Orion Retail Group
+
++---------------------------------------------------------------+
+| Description                         Qty   Rate        Amount  |
++---------------------------------------------------------------+
+| Enterprise integration work          1   280,000.00  280,000.00|
+| Data migration package               1   180,000.00  180,000.00|
+| Support services                     1    90,000.00   90,000.00|
++---------------------------------------------------------------+
+Declared subtotal:                     Rs. 550,000.00
+Tax @ 10%:                             Rs.  55,000.00
+TOTAL:                                 Rs. 605,000.00
+
+Vendor registration ID: NOT PROVIDED

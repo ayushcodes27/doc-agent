@@ -1,0 +1,53 @@
+{
+    "vendor_name": "Salesforce Inc",
+    "vendor_id": "27AASFL4412N1Z3",
+    "invoice_number": "SF-198K-2609",
+    "invoice_date": "2026-09-08",
+    "due_date": "2026-10-08",
+    "currency": "INR",
+    "subtotal": 190000.0,
+    "tax_amount": 8000.0,
+    "total_amount": 198000.0,
+    "visual_amount": null,
+    "visual_discrepancy_detected": false,
+    "visual_notes": null,
+    "line_items": [
+        {
+            "description": "CRM platform subscription",
+            "quantity": 1.0,
+            "unit_price": 120000.0,
+            "total": 120000.0
+        },
+        {
+            "description": "Analytics cloud add-on",
+            "quantity": 1.0,
+            "unit_price": 50000.0,
+            "total": 50000.0
+        },
+        {
+            "description": "Premium support",
+            "quantity": 1.0,
+            "unit_price": 20000.0,
+            "total": 20000.0
+        }
+    ],
+    "payment_terms": "Net 30",
+    "confidence_score": 0.98,
+    "expected_validations": {
+        "max_amount": "pass",
+        "approved_vendor": "pass",
+        "date_validity": "pass",
+        "line_item_math": "pass",
+        "total_math": "pass",
+        "visual_text_consistency": "pass",
+        "vendor_id_present": "pass",
+        "payment_terms_check": "pass",
+        "currency_consistency": "pass"
+    },
+    "expected_anomalies": [
+        "threshold_avoidance"
+    ],
+    "expected_decision": "flag_review",
+    "expected_approval_level": "manager",
+    "test_category": "Invoice deliberately just below the 200000 director-review threshold"
+}

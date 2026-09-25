@@ -1,0 +1,45 @@
+{
+    "vendor_name": "Dell Technologies",
+    "vendor_id": "29AABCD9988R1Z2",
+    "invoice_number": "DELL-FUT-2715",
+    "invoice_date": "2027-03-15",
+    "due_date": "2027-04-14",
+    "currency": "INR",
+    "subtotal": 236000.0,
+    "tax_amount": 23600.0,
+    "total_amount": 259600.0,
+    "visual_amount": null,
+    "visual_discrepancy_detected": false,
+    "visual_notes": null,
+    "line_items": [
+        {
+            "description": "Server workstation package",
+            "quantity": 2.0,
+            "unit_price": 82000.0,
+            "total": 164000.0
+        },
+        {
+            "description": "Enterprise monitor",
+            "quantity": 4.0,
+            "unit_price": 18000.0,
+            "total": 72000.0
+        }
+    ],
+    "payment_terms": "Net 30",
+    "confidence_score": 0.99,
+    "expected_validations": {
+        "max_amount": "pass",
+        "approved_vendor": "pass",
+        "date_validity": "fail",
+        "line_item_math": "pass",
+        "total_math": "pass",
+        "visual_text_consistency": "pass",
+        "vendor_id_present": "pass",
+        "payment_terms_check": "pass",
+        "currency_consistency": "pass"
+    },
+    "expected_anomalies": [],
+    "expected_decision": "flag_review",
+    "expected_approval_level": "director",
+    "test_category": "Future-dated invoice testing date validity"
+}

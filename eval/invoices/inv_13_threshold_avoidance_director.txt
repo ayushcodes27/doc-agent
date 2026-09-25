@@ -1,0 +1,20 @@
+SALESFORCE INC.
+Customer Platform Services
+31 Meridian Tower, Mumbai - 400013
+Tax ID: 27AASFL4412N1Z3
+
+BILL
+Reference: SF-198K-2609
+Issued: 08-Sep-2026
+Due: 08-Oct-2026
+Currency: INR
+Terms: Net 30
+
+CRM platform subscription                 1       120,000.00       120,000.00
+Analytics cloud add-on                    1        50,000.00        50,000.00
+Premium support                            1        20,000.00        20,000.00
+---------------------------------------------------------------------------
+Subtotal                                                        190,000.00
+GST @ 4.210526%                                                 8,000.00
+TOTAL                                                          198,000.00
+---------------------------------------------------------------------------

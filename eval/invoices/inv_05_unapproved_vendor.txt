@@ -1,0 +1,22 @@
+QUICKFIX IT SOLUTIONS
+IT Support, Networking & Repairs
+22 Maple Arcade, Sector 18, Noida - 201301
+GSTIN: 09AAQFQ8832M1ZT | billing@quickfix-example.in
+
+TAX INVOICE
+Invoice No.: QF-2609-118
+Invoice Date: 22-Sep-2026
+Due Date: 22-Oct-2026
+Currency: INR
+Payment Terms: Net 30
+Bill To: Crestline Retail Pvt Ltd, Mumbai - 400053
+
+Description                              Qty    Unit Price      Total
+----------------------------------------------------------------------
+Managed desktop support                   10       1,200.00     12,000.00
+Network troubleshooting                   5        1,000.00      5,000.00
+Router configuration                      2        1,500.00      3,000.00
+----------------------------------------------------------------------
+Subtotal:                                                   Rs.20,000.00
+GST @ 10%:                                                  Rs. 2,000.00
+TOTAL:                                                      Rs.22,000.00

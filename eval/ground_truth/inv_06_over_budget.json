@@ -1,0 +1,51 @@
+{
+    "vendor_name": "Tata Consultancy Services",
+    "vendor_id": "33AABCT1234E1Z5",
+    "invoice_number": "TCS-INV-260901",
+    "invoice_date": "2026-09-01",
+    "due_date": "2026-10-01",
+    "currency": "INR",
+    "subtotal": 590000.0,
+    "tax_amount": 59000.0,
+    "total_amount": 649000.0,
+    "visual_amount": null,
+    "visual_discrepancy_detected": false,
+    "visual_notes": null,
+    "line_items": [
+        {
+            "description": "Cloud modernization program",
+            "quantity": 1.0,
+            "unit_price": 350000.0,
+            "total": 350000.0
+        },
+        {
+            "description": "Application development services",
+            "quantity": 1.0,
+            "unit_price": 200000.0,
+            "total": 200000.0
+        },
+        {
+            "description": "Program management",
+            "quantity": 1.0,
+            "unit_price": 40000.0,
+            "total": 40000.0
+        }
+    ],
+    "payment_terms": "Net 30",
+    "confidence_score": 0.99,
+    "expected_validations": {
+        "max_amount": "fail",
+        "approved_vendor": "pass",
+        "date_validity": "pass",
+        "line_item_math": "pass",
+        "total_math": "pass",
+        "visual_text_consistency": "pass",
+        "vendor_id_present": "pass",
+        "payment_terms_check": "pass",
+        "currency_consistency": "pass"
+    },
+    "expected_anomalies": [],
+    "expected_decision": "flag_review",
+    "expected_approval_level": "director",
+    "test_category": "Approved vendor invoice exceeding the maximum amount cap"
+}

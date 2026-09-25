@@ -1,0 +1,26 @@
+DELOITTE TOUCHE TOHMATSU
+Professional Assurance & Advisory
+Tower 5, Lakeview Commercial District
+Hyderabad 500081 | +91-40-4550-2090 | invoices@deloitte-example.in
+
+                         SERVICE INVOICE
+Invoice ID : DTT-ADV-260914
+Issued     : 14-Sep-2026
+Due        : 29-Oct-2026
+GSTIN      : 36AADDT7712K1ZQ
+Client     : Meridian Foods India Pvt Ltd
+Currency   : INR
+Terms      : Net 45
+
+Service Description                         HSN/SAC       Qty       Amount
+---------------------------------------------------------------------------
+Statutory audit and assurance services      998221        1     Rs. 52,000.00
+Financial controls review                   998221        1     Rs. 15,000.00
+---------------------------------------------------------------------------
+                                                     Subtotal Rs. 67,000.00
+                                                     CGST 6%  Rs.  4,020.00
+                                                     SGST 6%  Rs.  4,020.00
+                                                     TOTAL    Rs. 75,040.00
+
+Authorized by: Finance Operations
+All services are billed in INR. Payment due within 45 days of invoice date.

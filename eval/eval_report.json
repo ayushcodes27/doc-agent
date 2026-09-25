@@ -1,0 +1,1670 @@
+{
+  "timestamp": "2026-09-25T16:54:02.081308+00:00",
+  "mode": "offline",
+  "metrics": {
+    "total_invoices": 20,
+    "validation_accuracy": 100.0,
+    "decision_accuracy": 100.0,
+    "approval_level_accuracy": 100.0,
+    "rule_breakdown": {
+      "max_amount": {
+        "total": 20,
+        "matched": 20,
+        "severity": "error",
+        "pass_count": 18,
+        "fail_count": 2
+      },
+      "approved_vendor": {
+        "total": 20,
+        "matched": 20,
+        "severity": "error",
+        "pass_count": 18,
+        "fail_count": 2
+      },
+      "date_validity": {
+        "total": 20,
+        "matched": 20,
+        "severity": "error",
+        "pass_count": 18,
+        "fail_count": 2
+      },
+      "line_item_math": {
+        "total": 20,
+        "matched": 20,
+        "severity": "warning",
+        "pass_count": 19,
+        "fail_count": 1
+      },
+      "total_math": {
+        "total": 20,
+        "matched": 20,
+        "severity": "warning",
+        "pass_count": 20,
+        "fail_count": 0
+      },
+      "visual_text_consistency": {
+        "total": 20,
+        "matched": 20,
+        "severity": "error",
+        "pass_count": 20,
+        "fail_count": 0
+      },
+      "vendor_id_present": {
+        "total": 20,
+        "matched": 20,
+        "severity": "warning",
+        "pass_count": 18,
+        "fail_count": 2
+      },
+      "payment_terms_check": {
+        "total": 20,
+        "matched": 20,
+        "severity": "info",
+        "pass_count": 19,
+        "fail_count": 1
+      },
+      "currency_consistency": {
+        "total": 20,
+        "matched": 20,
+        "severity": "warning",
+        "pass_count": 20,
+        "fail_count": 0
+      }
+    },
+    "anomalies_expected_total": 6,
+    "anomalies_detected_total": 6,
+    "anomalies_tp": 6,
+    "anomalies_fp": 0,
+    "anomalies_fn": 0,
+    "anomaly_precision": 1.0,
+    "anomaly_recall": 1.0,
+    "anomaly_f1": 1.0,
+    "extraction_accuracy": 0.0
+  },
+  "eval_results": [
+    {
+      "invoice_id": "inv_01_clean_approved_inr",
+      "vendor_name": "Infosys Limited",
+      "total_amount": 45360.0,
+      "category": "Clean standard Indian invoice with consulting services and CGST/SGST",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [],
+        "actual": [],
+        "raw": []
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "auto_approve",
+        "actual": "auto_approve",
+        "level_matched": true,
+        "expected_level": "auto",
+        "actual_level": "auto",
+        "risk_score": 0.0,
+        "reasoning": "Low risk score (0.00) and total amount within limits."
+      }
+    },
+    {
+      "invoice_id": "inv_02_clean_approved_usd",
+      "vendor_name": "Amazon Web Services",
+      "total_amount": 2484.0,
+      "category": "Clean USD cloud-services invoice with native currency handling",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [],
+        "actual": [],
+        "raw": []
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "auto_approve",
+        "actual": "auto_approve",
+        "level_matched": true,
+        "expected_level": "auto",
+        "actual_level": "auto",
+        "risk_score": 0.0,
+        "reasoning": "Low risk score (0.00) and total amount within limits."
+      }
+    },
+    {
+      "invoice_id": "inv_03_clean_small",
+      "vendor_name": "Logitech",
+      "total_amount": 9500.0,
+      "category": "Clean small office-equipment purchase with bullet-style line items",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [],
+        "actual": [],
+        "raw": []
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "auto_approve",
+        "actual": "auto_approve",
+        "level_matched": true,
+        "expected_level": "auto",
+        "actual_level": "auto",
+        "risk_score": 0.0,
+        "reasoning": "Low risk score (0.00) and total amount within limits."
+      }
+    },
+    {
+      "invoice_id": "inv_04_clean_services",
+      "vendor_name": "Deloitte Touche Tohmatsu",
+      "total_amount": 75040.0,
+      "category": "Clean professional-services invoice with Net 45 terms",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [],
+        "actual": [],
+        "raw": []
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "auto_approve",
+        "actual": "auto_approve",
+        "level_matched": true,
+        "expected_level": "auto",
+        "actual_level": "auto",
+        "risk_score": 0.0,
+        "reasoning": "Low risk score (0.00) and total amount within limits."
+      }
+    },
+    {
+      "invoice_id": "inv_05_unapproved_vendor",
+      "vendor_name": "QuickFix IT Solutions",
+      "total_amount": 22000.0,
+      "category": "Unknown vendor with otherwise clean extraction and arithmetic",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "fail",
+            "actual": "fail",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [],
+        "actual": [],
+        "raw": []
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "flag_review",
+        "actual": "flag_review",
+        "level_matched": true,
+        "expected_level": "manager",
+        "actual_level": "manager",
+        "risk_score": 0.25,
+        "reasoning": "Moderate risk score (0.25) requires human review by Manager."
+      }
+    },
+    {
+      "invoice_id": "inv_06_over_budget",
+      "vendor_name": "Tata Consultancy Services",
+      "total_amount": 649000.0,
+      "category": "Approved vendor invoice exceeding the maximum amount cap",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "fail",
+            "actual": "fail",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [],
+        "actual": [],
+        "raw": []
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "flag_review",
+        "actual": "flag_review",
+        "level_matched": true,
+        "expected_level": "director",
+        "actual_level": "director",
+        "risk_score": 0.25,
+        "reasoning": "Moderate risk score (0.25) requires human review by Director."
+      }
+    },
+    {
+      "invoice_id": "inv_07_future_date",
+      "vendor_name": "Dell Technologies",
+      "total_amount": 259600.0,
+      "category": "Future-dated invoice testing date validity",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "fail",
+            "actual": "fail",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [],
+        "actual": [],
+        "raw": []
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "flag_review",
+        "actual": "flag_review",
+        "level_matched": true,
+        "expected_level": "director",
+        "actual_level": "director",
+        "risk_score": 0.25,
+        "reasoning": "Moderate risk score (0.25) requires human review by Director."
+      }
+    },
+    {
+      "invoice_id": "inv_08_math_mismatch",
+      "vendor_name": "HP Inc",
+      "total_amount": 20350.0,
+      "category": "Line-item subtotal mismatch with downstream total calculation",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "fail",
+            "actual": "fail",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [],
+        "actual": [],
+        "raw": []
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "auto_approve",
+        "actual": "auto_approve",
+        "level_matched": true,
+        "expected_level": "auto",
+        "actual_level": "auto",
+        "risk_score": 0.1,
+        "reasoning": "Low risk score (0.10) and total amount within limits."
+      }
+    },
+    {
+      "invoice_id": "inv_09_missing_fields",
+      "vendor_name": "Google Cloud Platform",
+      "total_amount": 34100.0,
+      "category": "Missing vendor ID and payment terms with otherwise valid invoice",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "fail",
+            "actual": "fail",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "fail",
+            "actual": "fail",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [],
+        "actual": [],
+        "raw": []
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "auto_approve",
+        "actual": "auto_approve",
+        "level_matched": true,
+        "expected_level": "auto",
+        "actual_level": "auto",
+        "risk_score": 0.1,
+        "reasoning": "Low risk score (0.10) and total amount within limits."
+      }
+    },
+    {
+      "invoice_id": "inv_10_round_number",
+      "vendor_name": "Wipro Technologies",
+      "total_amount": 50000.0,
+      "category": "Round-number anomaly with otherwise clean invoice",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [
+          "round_number"
+        ],
+        "actual": [
+          "round_number"
+        ],
+        "raw": [
+          {
+            "type": "round_number",
+            "message": "Suspiciously round invoice total amount: 50,000.00",
+            "severity": "info",
+            "score": 0.3
+          }
+        ]
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "flag_review",
+        "actual": "flag_review",
+        "level_matched": true,
+        "expected_level": "manager",
+        "actual_level": "manager",
+        "risk_score": 0.3,
+        "reasoning": "Moderate risk score (0.30) requires human review by Manager."
+      }
+    },
+    {
+      "invoice_id": "inv_11_high_tax",
+      "vendor_name": "Tech Mahindra",
+      "total_amount": 28000.0,
+      "category": "High tax ratio anomaly at 40 percent of subtotal",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [
+          "high_tax_ratio"
+        ],
+        "actual": [
+          "high_tax_ratio"
+        ],
+        "raw": [
+          {
+            "type": "high_tax_ratio",
+            "message": "High tax amount (8,000.00) represents 40.0% of subtotal (20,000.00).",
+            "severity": "warning",
+            "score": 0.4
+          }
+        ]
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "flag_review",
+        "actual": "flag_review",
+        "level_matched": true,
+        "expected_level": "manager",
+        "actual_level": "manager",
+        "risk_score": 0.4,
+        "reasoning": "Moderate risk score (0.40) requires human review by Manager."
+      }
+    },
+    {
+      "invoice_id": "inv_12_threshold_avoidance",
+      "vendor_name": "Atlassian Pty Ltd",
+      "total_amount": 99500.0,
+      "category": "Invoice deliberately just below the 100000 manager-review threshold",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [
+          "threshold_avoidance"
+        ],
+        "actual": [
+          "threshold_avoidance"
+        ],
+        "raw": [
+          {
+            "type": "threshold_avoidance",
+            "message": "Amount (99,500.00) is suspiciously close to the 100,000.00 approval limit (structuring pattern).",
+            "severity": "warning",
+            "score": 0.5
+          }
+        ]
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "flag_review",
+        "actual": "flag_review",
+        "level_matched": true,
+        "expected_level": "manager",
+        "actual_level": "manager",
+        "risk_score": 0.5,
+        "reasoning": "Moderate risk score (0.50) requires human review by Manager."
+      }
+    },
+    {
+      "invoice_id": "inv_13_threshold_avoidance_director",
+      "vendor_name": "Salesforce Inc",
+      "total_amount": 198000.0,
+      "category": "Invoice deliberately just below the 200000 director-review threshold",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [
+          "threshold_avoidance"
+        ],
+        "actual": [
+          "threshold_avoidance"
+        ],
+        "raw": [
+          {
+            "type": "threshold_avoidance",
+            "message": "Amount (198,000.00) is suspiciously close to the 200,000.00 approval limit (structuring pattern).",
+            "severity": "warning",
+            "score": 0.5
+          }
+        ]
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "flag_review",
+        "actual": "flag_review",
+        "level_matched": true,
+        "expected_level": "manager",
+        "actual_level": "manager",
+        "risk_score": 0.5,
+        "reasoning": "Moderate risk score (0.50) requires human review by Manager."
+      }
+    },
+    {
+      "invoice_id": "inv_14_multiple_anomalies",
+      "vendor_name": "Microsoft Azure",
+      "total_amount": 100000.0,
+      "category": "Stacked round-number, high-tax-ratio, and threshold-avoidance anomalies",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [
+          "high_tax_ratio",
+          "threshold_avoidance"
+        ],
+        "actual": [
+          "high_tax_ratio",
+          "threshold_avoidance"
+        ],
+        "raw": [
+          {
+            "type": "high_tax_ratio",
+            "message": "High tax amount (25,925.93) represents 35.0% of subtotal (74,074.07).",
+            "severity": "warning",
+            "score": 0.35
+          },
+          {
+            "type": "threshold_avoidance",
+            "message": "Amount (100,000.00) is suspiciously close to the 100,000.00 approval limit (structuring pattern).",
+            "severity": "warning",
+            "score": 0.5
+          }
+        ]
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "flag_review",
+        "actual": "flag_review",
+        "level_matched": true,
+        "expected_level": "manager",
+        "actual_level": "manager",
+        "risk_score": 0.5,
+        "reasoning": "Moderate risk score (0.50) requires human review by Manager."
+      }
+    },
+    {
+      "invoice_id": "inv_15_manager_review",
+      "vendor_name": "Ernst & Young LLP",
+      "total_amount": 125000.0,
+      "category": "Low-risk invoice routed to manager solely because amount exceeds 100000",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [],
+        "actual": [],
+        "raw": []
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "flag_review",
+        "actual": "flag_review",
+        "level_matched": true,
+        "expected_level": "manager",
+        "actual_level": "manager",
+        "risk_score": 0.0,
+        "reasoning": "Invoice total amount (125,000.00) exceeds manager auto-approve threshold (100,000)."
+      }
+    },
+    {
+      "invoice_id": "inv_16_director_review",
+      "vendor_name": "KPMG Advisory Services",
+      "total_amount": 295000.0,
+      "category": "Low-risk invoice routed to director because amount exceeds 200000",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [],
+        "actual": [],
+        "raw": []
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "flag_review",
+        "actual": "flag_review",
+        "level_matched": true,
+        "expected_level": "director",
+        "actual_level": "director",
+        "risk_score": 0.0,
+        "reasoning": "Invoice total amount (295,000.00) exceeds director review threshold (200,000)."
+      }
+    },
+    {
+      "invoice_id": "inv_17_reject_high_risk",
+      "vendor_name": "Unknown Corp International",
+      "total_amount": 605000.0,
+      "category": "High-risk invoice combining unapproved vendor, budget breach, future date, and missing vendor ID",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "fail",
+            "actual": "fail",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "fail",
+            "actual": "fail",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "fail",
+            "actual": "fail",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "fail",
+            "actual": "fail",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [],
+        "actual": [],
+        "raw": []
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "reject",
+        "actual": "reject",
+        "level_matched": true,
+        "expected_level": "auto",
+        "actual_level": "auto",
+        "risk_score": 0.85,
+        "reasoning": "High risk score (0.85) exceeds rejection threshold (0.70)."
+      }
+    },
+    {
+      "invoice_id": "inv_18_date_formats",
+      "vendor_name": "Blue Dart Express Ltd",
+      "total_amount": 21450.0,
+      "category": "Non-standard DD/MM/YYYY-style dates and rupee-symbol currency extraction",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [],
+        "actual": [],
+        "raw": []
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "auto_approve",
+        "actual": "auto_approve",
+        "level_matched": true,
+        "expected_level": "auto",
+        "actual_level": "auto",
+        "risk_score": 0.0,
+        "reasoning": "Low risk score (0.00) and total amount within limits."
+      }
+    },
+    {
+      "invoice_id": "inv_19_multi_currency_eur",
+      "vendor_name": "Sodexo India Services",
+      "total_amount": 3190.0,
+      "category": "EUR invoice with European decimal/thousands formatting and native currency",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [],
+        "actual": [],
+        "raw": []
+      },
+      "dedup": {
+        "is_duplicate": false
+      },
+      "decision": {
+        "matched": true,
+        "expected": "auto_approve",
+        "actual": "auto_approve",
+        "level_matched": true,
+        "expected_level": "auto",
+        "actual_level": "auto",
+        "risk_score": 0.0,
+        "reasoning": "Low risk score (0.00) and total amount within limits."
+      }
+    },
+    {
+      "invoice_id": "inv_20_duplicate_pair",
+      "vendor_name": "Infosys Limited",
+      "total_amount": 45360.0,
+      "category": "Duplicate of invoice 01 for SHA-256 deduplication testing",
+      "overall_pass": true,
+      "validations": {
+        "all_matched": true,
+        "details": {
+          "max_amount": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "approved_vendor": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "date_validity": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "line_item_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "total_math": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "visual_text_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "vendor_id_present": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "payment_terms_check": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          },
+          "currency_consistency": {
+            "expected": "pass",
+            "actual": "pass",
+            "matched": true
+          }
+        }
+      },
+      "anomalies": {
+        "matched": true,
+        "expected": [],
+        "actual": [],
+        "raw": []
+      },
+      "dedup": {
+        "is_duplicate": true
+      },
+      "decision": {
+        "matched": true,
+        "expected": "reject",
+        "actual": "reject",
+        "level_matched": true,
+        "expected_level": "auto",
+        "actual_level": "auto",
+        "risk_score": 1.0,
+        "reasoning": "Duplicate invoice detected with matching vendor, invoice number, and total amount."
+      }
+    }
+  ],
+  "live_results": null
+}

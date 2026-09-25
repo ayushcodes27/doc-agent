@@ -23,9 +23,9 @@ def route_after_extract(state: AgentState) -> str:
 
 
 def route_after_dedup(state: AgentState) -> str:
-    """Short-circuit to decide if duplicate detected."""
+    """Short-circuit to risk_score if duplicate detected."""
     if state.get("is_duplicate"):
-        return "decide"
+        return "risk_score"
     return "anomaly_check"
 
 
@@ -87,4 +87,16 @@ def run_docagent(document_text: str, document_path: str = "document.pdf") -> Dic
         "messages": [],
     }
     config = {"configurable": {"thread_id": document_path}}
-    return app.invoke(initial_state, config=config)
+    result = app.invoke(initial_state, config=config)
+    state_snapshot = app.get_state(config)
+    
+    is_paused = len(state_snapshot.tasks) > 0 and any(task.interrupts for task in state_snapshot.tasks)
+    if is_paused:
+        interrupt_val = state_snapshot.tasks[0].interrupts[0].value
+        final_dict = dict(state_snapshot.values)
+        final_dict["decision"] = interrupt_val.get("decision", "flag_review")
+        final_dict["approval_level"] = interrupt_val.get("approval_level", "auto")
+        final_dict["decision_reasoning"] = interrupt_val.get("reasoning", "")
+        return final_dict
+
+    return dict(state_snapshot.values) if state_snapshot and state_snapshot.values else result

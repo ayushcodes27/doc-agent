@@ -1,0 +1,51 @@
+{
+    "vendor_name": "HP Inc",
+    "vendor_id": "06AABCH5512Q1Z7",
+    "invoice_number": "HP-2609-7731",
+    "invoice_date": "2026-09-19",
+    "due_date": "2026-10-19",
+    "currency": "INR",
+    "subtotal": 18500.0,
+    "tax_amount": 1850.0,
+    "total_amount": 20350.0,
+    "visual_amount": null,
+    "visual_discrepancy_detected": false,
+    "visual_notes": null,
+    "line_items": [
+        {
+            "description": "Business laptops",
+            "quantity": 5.0,
+            "unit_price": 2000.0,
+            "total": 10000.0
+        },
+        {
+            "description": "Docking stations",
+            "quantity": 2.0,
+            "unit_price": 1500.0,
+            "total": 3000.0
+        },
+        {
+            "description": "Wireless displays",
+            "quantity": 1.0,
+            "unit_price": 2000.0,
+            "total": 2000.0
+        }
+    ],
+    "payment_terms": "Net 30",
+    "confidence_score": 0.98,
+    "expected_validations": {
+        "max_amount": "pass",
+        "approved_vendor": "pass",
+        "date_validity": "pass",
+        "line_item_math": "fail",
+        "total_math": "pass",
+        "visual_text_consistency": "pass",
+        "vendor_id_present": "pass",
+        "payment_terms_check": "pass",
+        "currency_consistency": "pass"
+    },
+    "expected_anomalies": [],
+    "expected_decision": "auto_approve",
+    "expected_approval_level": "auto",
+    "test_category": "Line-item subtotal mismatch with downstream total calculation"
+}

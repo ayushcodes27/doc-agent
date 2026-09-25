@@ -1,0 +1,51 @@
+{
+    "vendor_name": "Ernst & Young LLP",
+    "vendor_id": "27AAAEY7712L1Z9",
+    "invoice_number": "EY-125K-26",
+    "invoice_date": "2026-09-04",
+    "due_date": "2026-10-19",
+    "currency": "INR",
+    "subtotal": 125000.0,
+    "tax_amount": 0.0,
+    "total_amount": 125000.0,
+    "visual_amount": null,
+    "visual_discrepancy_detected": false,
+    "visual_notes": null,
+    "line_items": [
+        {
+            "description": "Internal controls advisory",
+            "quantity": 1.0,
+            "unit_price": 70000.0,
+            "total": 70000.0
+        },
+        {
+            "description": "Financial process review",
+            "quantity": 1.0,
+            "unit_price": 35000.0,
+            "total": 35000.0
+        },
+        {
+            "description": "Implementation support",
+            "quantity": 1.0,
+            "unit_price": 20000.0,
+            "total": 20000.0
+        }
+    ],
+    "payment_terms": "Net 30",
+    "confidence_score": 0.99,
+    "expected_validations": {
+        "max_amount": "pass",
+        "approved_vendor": "pass",
+        "date_validity": "pass",
+        "line_item_math": "pass",
+        "total_math": "pass",
+        "visual_text_consistency": "pass",
+        "vendor_id_present": "pass",
+        "payment_terms_check": "pass",
+        "currency_consistency": "pass"
+    },
+    "expected_anomalies": [],
+    "expected_decision": "flag_review",
+    "expected_approval_level": "manager",
+    "test_category": "Low-risk invoice routed to manager solely because amount exceeds 100000"
+}

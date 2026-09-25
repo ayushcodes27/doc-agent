@@ -1,0 +1,51 @@
+{
+    "vendor_name": "Infosys Limited",
+    "vendor_id": "27AABCI1234F1ZM",
+    "invoice_number": "INF-2026-0925-017",
+    "invoice_date": "2026-09-25",
+    "due_date": "2026-10-25",
+    "currency": "INR",
+    "subtotal": 42000.0,
+    "tax_amount": 3360.0,
+    "total_amount": 45360.0,
+    "visual_amount": null,
+    "visual_discrepancy_detected": false,
+    "visual_notes": null,
+    "line_items": [
+        {
+            "description": "Application architecture consulting",
+            "quantity": 60.0,
+            "unit_price": 450.0,
+            "total": 27000.0
+        },
+        {
+            "description": "API integration consulting",
+            "quantity": 25.0,
+            "unit_price": 400.0,
+            "total": 10000.0
+        },
+        {
+            "description": "Technical documentation",
+            "quantity": 20.0,
+            "unit_price": 250.0,
+            "total": 5000.0
+        }
+    ],
+    "payment_terms": "Net 30",
+    "confidence_score": 0.99,
+    "expected_validations": {
+        "max_amount": "pass",
+        "approved_vendor": "pass",
+        "date_validity": "pass",
+        "line_item_math": "pass",
+        "total_math": "pass",
+        "visual_text_consistency": "pass",
+        "vendor_id_present": "pass",
+        "payment_terms_check": "pass",
+        "currency_consistency": "pass"
+    },
+    "expected_anomalies": [],
+    "expected_decision": "reject",
+    "expected_approval_level": "auto",
+    "test_category": "Duplicate of invoice 01 for SHA-256 deduplication testing"
+}

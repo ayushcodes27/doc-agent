@@ -1,0 +1,22 @@
+GOOGLE CLOUD PLATFORM
+Cloud Infrastructure Services
+88 Cloud Ring, Bengaluru - 560066
+billing@gcp-example.in | +91-80-4400-1199
+
+                         TAX INVOICE
+Invoice Number: GCP-SEP-26044
+Invoice Date: 16-Sep-2026
+Currency: INR
+Bill To: Riverstone Analytics Pvt Ltd
+PO: RA-CLOUD-91
+
+Cloud compute usage                     1    Rs. 18,000.00    Rs. 18,000.00
+Managed storage                         1    Rs.  8,000.00    Rs.  8,000.00
+Network egress                          1    Rs.  5,000.00    Rs.  5,000.00
+----------------------------------------------------------------------
+Subtotal                                                    Rs. 31,000.00
+GST @ 10%                                                   Rs.  3,100.00
+TOTAL                                                       Rs. 34,100.00
+----------------------------------------------------------------------
+Payment terms: Not specified on this invoice.
+Vendor tax registration: Not printed on this invoice.

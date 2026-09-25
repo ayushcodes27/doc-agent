@@ -1,0 +1,20 @@
+WIPRO TECHNOLOGIES
+Digital Operations & Consulting
+12 Sunrise Business Park, Hyderabad - 500032
+GSTIN: 36AAACW6721P1ZX
+
+INVOICE
+Invoice No: WIP-RT-50000
+Invoice Date: 12-Sep-2026    Due: 12-Oct-2026
+Currency: INR    Payment Terms: Net 30
+
+Service                                      Qty       Amount
+----------------------------------------------------------------
+Managed application support                  1       30,000.00
+Security assessment                           1       12,000.00
+Service management                            1        8,000.00
+----------------------------------------------------------------
+Subtotal:                                            50,000.00
+Tax @ 0%:                                              0.00
+TOTAL:                                               50,000.00
+----------------------------------------------------------------

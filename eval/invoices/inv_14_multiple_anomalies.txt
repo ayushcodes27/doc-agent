@@ -1,0 +1,19 @@
+MICROSOFT AZURE
+Cloud Infrastructure Services
+17 Digital Harbour, Chennai - 600028
+Tax ID: 33AAMSA9201F1ZP
+
+============================= TAX INVOICE =============================
+Invoice: AZ-100000-26
+Date: 05-Sep-2026       Due: 05-Oct-2026       Currency: INR
+Payment Terms: Net 30
+
+Azure compute capacity                    1       37,000.00       37,000.00
+Managed database                          1       20,000.00       20,000.00
+Storage and networking                    1       10,000.00       10,000.00
+Support plan                              1        7,074.07        7,074.07
+------------------------------------------------------------------------
+Subtotal                                                         74,074.07
+Tax adjustment (35%)                                             25,925.93
+TOTAL                                                           100,000.00
+------------------------------------------------------------------------

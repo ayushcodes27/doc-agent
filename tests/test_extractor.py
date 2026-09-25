@@ -48,7 +48,7 @@ def test_extract_invoice_data_empty_input():
 def test_extract_invoice_data_missing_api_key():
     with patch("tools.extractor.settings.GEMINI_API_KEY", ""):
         with pytest.raises(ValueError, match="GEMINI_API_KEY is not configured"):
-            extract_invoice_data("Sample invoice text", api_key="")
+            extract_invoice_data("Sample invoice text", api_key="", provider="gemini")
 
 
 @patch("tools.extractor.get_genai_client_and_model")

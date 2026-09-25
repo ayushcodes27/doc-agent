@@ -1,0 +1,51 @@
+{
+    "vendor_name": "Amazon Web Services",
+    "vendor_id": "AWS-TAX-784219",
+    "invoice_number": "AWS-SEP26-4418",
+    "invoice_date": "2026-09-20",
+    "due_date": "2026-10-20",
+    "currency": "USD",
+    "subtotal": 2300.0,
+    "tax_amount": 184.0,
+    "total_amount": 2484.0,
+    "visual_amount": null,
+    "visual_discrepancy_detected": false,
+    "visual_notes": null,
+    "line_items": [
+        {
+            "description": "Compute and container hosting",
+            "quantity": 1.0,
+            "unit_price": 1420.0,
+            "total": 1420.0
+        },
+        {
+            "description": "Managed database service",
+            "quantity": 1.0,
+            "unit_price": 610.0,
+            "total": 610.0
+        },
+        {
+            "description": "Object storage and transfer",
+            "quantity": 1.0,
+            "unit_price": 270.0,
+            "total": 270.0
+        }
+    ],
+    "payment_terms": "Net 30",
+    "confidence_score": 0.99,
+    "expected_validations": {
+        "max_amount": "pass",
+        "approved_vendor": "pass",
+        "date_validity": "pass",
+        "line_item_math": "pass",
+        "total_math": "pass",
+        "visual_text_consistency": "pass",
+        "vendor_id_present": "pass",
+        "payment_terms_check": "pass",
+        "currency_consistency": "pass"
+    },
+    "expected_anomalies": [],
+    "expected_decision": "auto_approve",
+    "expected_approval_level": "auto",
+    "test_category": "Clean USD cloud-services invoice with native currency handling"
+}

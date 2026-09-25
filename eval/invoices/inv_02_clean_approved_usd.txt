@@ -1,0 +1,27 @@
+AWS CLOUD SERVICES
+Amazon Web Services
+901 Harbor View, Suite 620
+Seattle-style Operations Center, Mumbai 400051
+Tax ID: AWS-TAX-784219
+support-billing@aws-example.in
+----------------------------------------------------------------------
+                               INVOICE
+
+Invoice #: AWS-SEP26-4418                 Invoice Date: 20-Sep-2026
+Due Date: 20-Oct-2026                     Currency: USD
+Customer: Northstar Analytics Pvt Ltd     PO: NSA-CLD-2219
+Payment Terms: Net 30
+
+DESCRIPTION                              QTY      RATE          AMOUNT
+----------------------------------------------------------------------
+Compute and container hosting             1    $1,420.00      $1,420.00
+Managed database service                  1      $610.00        $610.00
+Object storage and transfer               1      $270.00        $270.00
+----------------------------------------------------------------------
+                                                   Subtotal     $2,300.00
+                                                   Tax (8%)       $184.00
+                                                   TOTAL        $2,484.00
+----------------------------------------------------------------------
+
+Remit payment referencing invoice AWS-SEP26-4418.
+This invoice is issued in USD. No Indian GST is included.

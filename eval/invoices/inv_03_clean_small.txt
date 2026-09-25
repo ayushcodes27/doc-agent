@@ -1,0 +1,25 @@
+OFFICE EQUIPMENT BILL
+----------------------------------------------------------------
+Vendor: Logitech
+Address: 8 Crescent Industrial Estate, Bengaluru - 560048
+GSTIN: 29AALCL4821P1Z8
+Email: orders@logitech-example.in | Phone: +91-80-3004-1188
+
+Bill To: Horizon Design Studio, Mumbai - 400076
+Invoice No.: LOG-OFF-78126
+Invoice Date: 18/09/2026
+Due Date: 03/10/2026
+Terms: Net 15
+Currency: INR
+
+Items:
+* Wireless keyboard (K-series equivalent)      5 x Rs. 1,050.00 = Rs. 5,250.00
+* Optical wireless mouse                       4 x Rs.   650.00 = Rs. 2,600.00
+* HD business webcam                           1 x Rs. 1,200.00 = Rs. 1,200.00
+* USB-C presentation mouse                    1 x Rs.   450.00 = Rs.   450.00
+----------------------------------------------------------------
+Subtotal                                                     Rs. 9,500.00
+GST @ 0%                                                     Rs.     0.00
+TOTAL                                                        Rs. 9,500.00
+----------------------------------------------------------------
+Payment reference: LOG-OFF-78126

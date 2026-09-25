@@ -29,6 +29,9 @@ Extraction Instructions & Rules:
     "subtotal": 0.00,
     "tax_amount": 0.00,
     "total_amount": 0.00,
+    "visual_amount": null,
+    "visual_discrepancy_detected": false,
+    "visual_notes": null,
     "line_items": [
         {
             "description": "string",
@@ -47,6 +50,14 @@ Important Guidelines:
 - If a value is missing or unreadable, estimate confidence_score lower (e.g., 0.5 - 0.7).
 - Verify: subtotal + tax_amount ≈ total_amount.
 - Verify: each line item quantity × unit_price ≈ item total.
+- DUAL-LAYER FRAUD & SCAN DISCREPANCY INSPECTION:
+  Carefully cross-examine both the digital text layer / line items AND any embedded images, scanned receipts, stamps, or physical copies in the document.
+  If an embedded scanned copy, image, or receipt stamp displays an amount (e.g. 42,480.00) that conflicts with the digital line-item text calculation (e.g. 45,312.00):
+  1. Set "total_amount" to the line-item sum / digital text calculation (e.g. 45312.00).
+  2. Set "visual_amount" to the exact numeric amount visible on the scanned image / physical copy (e.g. 42480.00).
+  3. Set "visual_discrepancy_detected" to true.
+  4. Set "visual_notes" describing the discrepancy (e.g. "Amount shown on embedded scanned copy is ₹42,480.00 while digital line items calculate to ₹45,312.00").
+  DO NOT silently hide or alter the visual scan amount to match the digital text math!
 - Return ONLY the raw JSON object, without markdown explanations or preamble.
 """
 
@@ -102,14 +113,14 @@ def extract_with_gemini(
     model_name: Optional[str] = None,
     previous_error: Optional[str] = None,
 ) -> ExtractedInvoice:
-    """Extract invoice data using Google Gemini API."""
+    """Extract invoice data using Google Gemini API with dual-channel vision & text support."""
     client, model = get_genai_client_and_model(api_key=api_key, model_name=model_name)
 
     contents_to_send = []
+    if document_text and document_text.strip():
+        contents_to_send.append(f"DIGITAL TEXT LAYER (Extracted from document):\n{document_text}")
     if document_bytes and mime_type:
         contents_to_send.append(types.Part.from_bytes(data=document_bytes, mime_type=mime_type))
-    elif document_text:
-        contents_to_send.append(f"DOCUMENT CONTENT:\n{document_text}")
     
     prompt = EXTRACTION_PROMPT_TEMPLATE
     if previous_error:

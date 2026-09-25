@@ -37,7 +37,19 @@ class ExtractedInvoice(BaseModel):
     currency: str = Field(default="INR", description="Currency code (e.g. INR, USD, EUR)")
     subtotal: float = Field(description="Sum of all line items before tax")
     tax_amount: float = Field(default=0.0, description="Total tax amount")
-    total_amount: float = Field(description="Final invoice total including taxes")
+    total_amount: float = Field(description="Final invoice total including taxes (calculated from line items/text)")
+    visual_amount: Optional[float] = Field(
+        default=None,
+        description="Amount explicitly displayed on any embedded scanned image, receipt crop, or physical stamp if different from textual total"
+    )
+    visual_discrepancy_detected: bool = Field(
+        default=False,
+        description="True if an embedded image, physical receipt scan, or stamp conflicts with the digital line items"
+    )
+    visual_notes: Optional[str] = Field(
+        default=None,
+        description="Detailed explanation of any discrepancy found between visual scan/image and digital text"
+    )
     line_items: List[LineItem] = Field(default_factory=list, description="List of invoiced items")
     payment_terms: Optional[str] = Field(default=None, description="Terms of payment (e.g., Net 30)")
     confidence_score: float = Field(

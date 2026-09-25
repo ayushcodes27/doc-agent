@@ -68,3 +68,23 @@ def test_detect_anomalies_high_tax_ratio():
     tax_anomaly = next((a for a in anomalies if a["type"] == "high_tax_ratio"), None)
     assert tax_anomaly is not None
     assert tax_anomaly["severity"] == "warning"
+
+
+def test_detect_anomalies_visual_discrepancy():
+    invoice = ExtractedInvoice(
+        vendor_name="Acme Corp",
+        invoice_number="INV-999",
+        invoice_date=date.today(),
+        subtotal=38400.0,
+        tax_amount=6912.0,
+        total_amount=45312.0,
+        visual_amount=42480.0,
+        visual_discrepancy_detected=True,
+    )
+    anomalies = detect_anomalies(invoice)
+    mismatch = next((a for a in anomalies if a["type"] == "visual_text_mismatch"), None)
+    assert mismatch is not None
+    assert mismatch["severity"] == "error"
+    assert mismatch["score"] == 0.95
+    assert "42,480.00" in mismatch["message"]
+    assert "45,312.00" in mismatch["message"]

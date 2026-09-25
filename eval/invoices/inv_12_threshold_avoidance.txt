@@ -1,0 +1,20 @@
+ATLASSIAN PTY LTD
+Collaboration Software Services
+Level 6, Harbor Square, Bengaluru - 560001
+VAT/GST ID: 29AATLA7812R1Z4
+
+                         INVOICE
+Invoice #: ATL-SEP-995
+Invoice Date: 09-Sep-2026
+Due Date: 09-Oct-2026
+Currency: INR | Terms: Net 30
+Customer: BluePeak Software Labs Pvt Ltd
+
+Jira Enterprise subscription                  1     60,000.00     60,000.00
+Confluence Enterprise subscription             1     30,000.00     30,000.00
+Premium support                                1      5,000.00      5,000.00
+-----------------------------------------------------------------------
+Subtotal                                                              95,000.00
+Tax @ 4.736842%                                                       4,500.00
+TOTAL                                                                 99,500.00
+-----------------------------------------------------------------------

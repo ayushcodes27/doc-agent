@@ -1,0 +1,23 @@
+HP INC.
+Business Devices & Services
+4 Tech Park Road, Gurugram - 122018
+GSTIN: 06AABCH5512Q1Z7
+
+BILL
+Invoice: HP-2609-7731
+Date: 19-Sep-2026 | Due: 19-Oct-2026 | Currency: INR
+Terms: Net 30
+
++----+--------------------------------+-----+-----------+------------+
+| #  | Item                           | Qty | Unit      | Line Total |
++----+--------------------------------+-----+-----------+------------+
+| 1  | Business laptops               |  5  | 2,000.00  | 10,000.00  |
+| 2  | Docking stations               |  2  | 1,500.00  |  3,000.00  |
+| 3  | Wireless displays              |  1  | 2,000.00  |  2,000.00  |
++----+--------------------------------+-----+-----------+------------+
+                         Actual line-item sum: Rs. 15,000.00
+                         Declared subtotal:     Rs. 18,500.00
+                         GST @ 10%:              Rs.  1,850.00
+                         TOTAL:                  Rs. 20,350.00
+
+NOTE: Subtotal shown above is the amount billed by the supplier.

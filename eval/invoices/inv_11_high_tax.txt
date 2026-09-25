@@ -1,0 +1,18 @@
+TECH MAHINDRA
+Enterprise Technology Services
+7 Knowledge Avenue, Pune - 411057
+GSTIN: 27AAACT8891D1Z6
+
+TAX INVOICE
+No. TM-HR-2611        Date: 10-Sep-2026        Due: 10-Oct-2026
+Currency: INR        Terms: Net 30
+
+Service                                     Qty       Total
+----------------------------------------------------------------
+Specialized security consulting              1      Rs. 12,000.00
+Incident response readiness                  1       Rs. 8,000.00
+----------------------------------------------------------------
+Subtotal                                             Rs. 20,000.00
+Special levy / tax adjustment (40%)                  Rs.  8,000.00
+TOTAL                                                Rs. 28,000.00
+----------------------------------------------------------------
