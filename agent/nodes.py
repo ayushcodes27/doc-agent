@@ -138,11 +138,24 @@ def detect_anomalies(state: Dict[str, Any]) -> Dict[str, Any]:
             "audit_trail": audit_trail,
         }
 
-    anomalies = run_anomaly_detection(extracted_data)
+    # Retrieve real vendor spend history from database if available
+    history = []
+    vendor_name = extracted_data.get("vendor_name")
+    if vendor_name:
+        try:
+            from db.session import get_db_context
+            from db.repository import get_vendor_spend_history
+            with get_db_context() as db:
+                history = get_vendor_spend_history(db, vendor_name)
+        except Exception as e:
+            logger.debug(f"Could not retrieve vendor history from DB: {e}")
+            history = []
+
+    anomalies = run_anomaly_detection(extracted_data, historical_data=history)
     _log_audit(
         audit_trail,
         "anomaly_detection",
-        f"Detected {len(anomalies)} statistical/pattern anomalies."
+        f"Evaluated with {len(history)} historical records. Detected {len(anomalies)} statistical/pattern anomalies."
     )
 
     return {

@@ -1,6 +1,6 @@
 # 🧪 DocAgent Benchmark & Evaluation Report
 
-**Execution Timestamp:** `2026-09-25 16:54:02 UTC`  
+**Execution Timestamp:** `2026-09-25 16:59:56 UTC`  
 **Evaluation Mode:** `OFFLINE`  
 **Test Invoices Evaluated:** `20`  
 
