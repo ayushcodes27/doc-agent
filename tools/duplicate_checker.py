@@ -154,6 +154,145 @@ def check_duplicate(
     }
 
 
+def check_file_hash_gate(
+    file_bytes: bytes,
+    db: Optional[Any] = None,
+) -> Dict[str, Any]:
+    """
+    Smart Pre-LLM File Hash Gate.
+    Computes SHA-256(file_bytes) and checks for prior processing:
+      - Active/Approved prior record -> Block duplicate file upload.
+      - Previously failed/rejected/appealed -> Allow reprocessing (linked via supersedes_id).
+    """
+    if not file_bytes:
+        return {"is_blocked": False, "file_hash": "", "is_reprocess": False}
+
+    file_hash = hashlib.sha256(file_bytes).hexdigest()
+
+    try:
+        from db.session import get_db_context
+        from db.models import InvoiceRecord
+        from sqlalchemy import select, desc
+
+        def _query(session):
+            stmt = (
+                select(InvoiceRecord)
+                .where(InvoiceRecord.file_hash == file_hash)
+                .order_by(desc(InvoiceRecord.created_at))
+            )
+            return session.scalars(stmt).first()
+
+        if db is not None:
+            prior = _query(db)
+        else:
+            with get_db_context() as session:
+                prior = _query(session)
+
+        if prior:
+            prior_status = (prior.status or "").lower()
+            prior_decision = (prior.decision or "").lower()
+
+            # Active / Completed / Approved -> Block duplicate
+            is_active_or_approved = (
+                prior_status in ["completed", "approved_by_human", "pending_review"]
+                or prior_decision in ["auto_approve", "flag_review"]
+            ) and prior_status not in ["rejected", "rejected_by_human", "failed_extraction"]
+
+            if is_active_or_approved:
+                return {
+                    "is_blocked": True,
+                    "file_hash": file_hash,
+                    "prior_case_id": prior.id,
+                    "prior_status": prior.status,
+                    "reason": f"Identical file already processed as case #{prior.id} (Status: {prior.status}).",
+                }
+            else:
+                # Prior attempt was rejected, failed extraction, or appealed -> Allow reprocessing!
+                return {
+                    "is_blocked": False,
+                    "file_hash": file_hash,
+                    "is_reprocess": True,
+                    "supersedes_id": prior.id,
+                    "reason": f"Reprocessing previously {prior.status} case #{prior.id}.",
+                }
+
+    except Exception as e:
+        logger.debug(f"File hash gate database check skipped: {e}")
+
+    return {
+        "is_blocked": False,
+        "file_hash": file_hash,
+        "is_reprocess": False,
+    }
+
+
+def check_near_duplicate(
+    invoice: Union[ExtractedInvoice, Dict[str, Any]],
+    db: Optional[Any] = None,
+    exclude_case_id: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Checks for near-duplicate invoices:
+    Same vendor and amount, but invoice number differs slightly (e.g. typos, re-bills).
+    Excludes the invoice's own case ID to prevent self-matching.
+    """
+    vendor_name = str(_get_field(invoice, "vendor_name", "") or "").strip().lower()
+    inv_num = str(_get_field(invoice, "invoice_number", "") or "").strip().upper()
+    amount = float(_get_field(invoice, "total_amount", 0.0) or 0.0)
+
+    if not vendor_name or amount <= 0:
+        return {"is_near_duplicate": False}
+
+    try:
+        from db.session import get_db_context
+        from db.models import InvoiceRecord
+        from sqlalchemy import select, func
+
+        def _search(session):
+            stmt = (
+                select(InvoiceRecord)
+                .where(
+                    func.lower(InvoiceRecord.vendor_name) == vendor_name,
+                    func.abs(InvoiceRecord.total_amount - amount) <= 0.05,
+                    InvoiceRecord.status != "rejected"
+                )
+            )
+            if exclude_case_id:
+                stmt = stmt.where(InvoiceRecord.id != exclude_case_id)
+            return session.scalars(stmt).all()
+
+        records = _search(db) if db is not None else []
+        if db is None:
+            with get_db_context() as session:
+                records = _search(session)
+
+        for rec in records:
+            prior_num = (rec.invoice_number or "").strip().upper()
+            if prior_num == inv_num:
+                # Exact match
+                return {
+                    "is_near_duplicate": False,
+                    "is_exact_duplicate": True,
+                    "original_id": rec.id,
+                    "prior_invoice_number": prior_num,
+                }
+            # Levenshtein distance check on invoice number (differing by 1-2 characters)
+            if len(prior_num) >= 3 and len(inv_num) >= 3:
+                # Simple distance: count differences
+                diff_chars = sum(1 for a, b in zip(prior_num, inv_num) if a != b) + abs(len(prior_num) - len(inv_num))
+                if diff_chars <= 2:
+                    return {
+                        "is_near_duplicate": True,
+                        "original_id": rec.id,
+                        "prior_invoice_number": prior_num,
+                        "reason": f"Near-duplicate detected: same vendor & amount, but invoice number '{inv_num}' closely resembles '{prior_num}' on case #{rec.id} (distance: {diff_chars}).",
+                    }
+    except Exception as e:
+        logger.debug(f"Near-duplicate check skipped: {e}")
+
+    return {"is_near_duplicate": False}
+
+
 def register_invoice_fingerprint(
     invoice: Union[ExtractedInvoice, Dict[str, Any]],
     ttl_seconds: int = 90 * 86400,

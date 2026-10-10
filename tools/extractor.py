@@ -219,6 +219,72 @@ def extract_with_github_models(
     return ExtractedInvoice(**data)
 
 
+VERIFIER_PROMPT = """You are an independent financial verification auditor.
+Extract the key anchor fields and exact textual evidence snippets from the document text.
+Return ONLY a valid JSON object matching this schema:
+{
+    "vendor_name": "string (name of supplier)",
+    "invoice_number": "string (invoice ID)",
+    "invoice_date": "YYYY-MM-DD",
+    "subtotal": 0.00,
+    "tax_amount": 0.00,
+    "total_amount": 0.00,
+    "evidence_snippets": {
+        "vendor_name": "exact excerpt string from text where vendor is stated",
+        "total_amount": "exact excerpt string from text where final total amount appears",
+        "invoice_number": "exact excerpt string where invoice number appears"
+    }
+}
+Do not make assumptions. Extract exact verbatim numbers and names.
+"""
+
+
+def extract_with_verifier(
+    document_text: str,
+    token: Optional[str] = None,
+    model_name: Optional[str] = None,
+    endpoint: Optional[str] = None,
+) -> Optional[Dict[str, Any]]:
+    """
+    Reader B Verifier: Performs fast text-only extraction using GitHub Models (GPT-4o-mini).
+    Extracts key anchor fields and evidence snippets to cross-examine Reader A.
+    """
+    if not document_text or not document_text.strip():
+        return None
+
+    try:
+        from openai import OpenAI
+    except ImportError:
+        logger.warning("OpenAI package not available for Reader B verifier.")
+        return None
+
+    gh_token = token or settings.GITHUB_TOKEN
+    if not gh_token:
+        logger.debug("GITHUB_TOKEN not configured; skipping Reader B verifier.")
+        return None
+
+    gh_endpoint = endpoint or settings.GITHUB_ENDPOINT
+    gh_model = model_name or settings.GITHUB_MODEL
+
+    try:
+        client = OpenAI(base_url=gh_endpoint, api_key=gh_token, timeout=25.0)
+        messages = [
+            {"role": "system", "content": VERIFIER_PROMPT},
+            {"role": "user", "content": f"DOCUMENT TEXT:\n{document_text[:6000]}"}
+        ]
+        response = client.chat.completions.create(
+            model=gh_model,
+            messages=messages,
+            response_format={"type": "json_object"},
+            temperature=0.0,
+        )
+        content = response.choices[0].message.content or "{}"
+        return _clean_json_response(content)
+    except Exception as e:
+        logger.warning(f"Reader B verifier execution exception: {e}")
+        return None
+
+
 def extract_invoice_data(
     document_text: str = "",
     document_bytes: Optional[bytes] = None,

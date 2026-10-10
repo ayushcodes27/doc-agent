@@ -57,9 +57,12 @@ class InvoiceRecord(Base):
     visual_discrepancy_detected: Mapped[bool] = mapped_column(Boolean, default=False)
     visual_notes: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
     
-    # Deduplication & Risk
+    # Deduplication & Verification Lineage
     is_duplicate: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
+    file_hash: Mapped[Optional[str]] = mapped_column(String(64), index=True, nullable=True)
+    supersedes_id: Mapped[Optional[str]] = mapped_column(String(36), nullable=True)
     fingerprint: Mapped[Optional[str]] = mapped_column(String(64), index=True)
+    verification_level: Mapped[str] = mapped_column(String(20), default="none")  # full, partial, none
     risk_score: Mapped[float] = mapped_column(Float, default=0.0)
     
     # Decision & Routing
@@ -152,5 +155,24 @@ class AuditTrailRecord(Base):
     step: Mapped[str] = mapped_column(String(100), index=True)
     timestamp: Mapped[str] = mapped_column(String(100))
     detail: Mapped[str] = mapped_column(Text, default="")
+    previous_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
+    entry_hash: Mapped[Optional[str]] = mapped_column(String(64), nullable=True)
 
     invoice: Mapped["InvoiceRecord"] = relationship("InvoiceRecord", back_populates="audit_trail")
+
+
+class PendingReviewRecord(Base):
+    """Queue of invoices awaiting human review, correction, or appeal."""
+    __tablename__ = "pending_reviews"
+
+    id: Mapped[str] = mapped_column(String(36), primary_key=True, default=generate_uuid)
+    invoice_id: Mapped[str] = mapped_column(String(36), ForeignKey("invoices.id", ondelete="CASCADE"), index=True)
+    thread_id: Mapped[str] = mapped_column(String(255), index=True)
+    status: Mapped[str] = mapped_column(String(50), default="pending", index=True)  # pending, approved, rejected, corrected
+    assigned_level: Mapped[str] = mapped_column(String(50), default="manager")      # manager, director
+    reentry_count: Mapped[int] = mapped_column(Integer, default=0)
+    reason: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    reviewer_id: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=utc_now)
+    resolved_at: Mapped[Optional[datetime]] = mapped_column(DateTime(timezone=True), nullable=True)
+

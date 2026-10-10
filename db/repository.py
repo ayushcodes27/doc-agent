@@ -64,6 +64,9 @@ def save_processed_invoice(
         invoice.visual_discrepancy_detected = bool(extracted.get("visual_discrepancy_detected", False))
         invoice.visual_notes = extracted.get("visual_notes")
         invoice.is_duplicate = is_duplicate
+        invoice.file_hash = workflow_result.get("file_hash") or invoice.file_hash
+        invoice.supersedes_id = workflow_result.get("supersedes_id") or invoice.supersedes_id
+        invoice.verification_level = workflow_result.get("verification_level", "none")
         invoice.risk_score = risk_score
         invoice.decision = decision
         invoice.approval_level = level
@@ -95,6 +98,9 @@ def save_processed_invoice(
             visual_discrepancy_detected=bool(extracted.get("visual_discrepancy_detected", False)),
             visual_notes=extracted.get("visual_notes"),
             is_duplicate=is_duplicate,
+            file_hash=workflow_result.get("file_hash"),
+            supersedes_id=workflow_result.get("supersedes_id"),
+            verification_level=workflow_result.get("verification_level", "none"),
             risk_score=risk_score,
             decision=decision,
             approval_level=level,
@@ -144,11 +150,37 @@ def save_processed_invoice(
                 step=audit.get("step", "general"),
                 timestamp=audit.get("timestamp", utc_now().isoformat()),
                 detail=audit.get("detail", ""),
+                previous_hash=audit.get("previous_hash"),
+                entry_hash=audit.get("entry_hash"),
             )
         )
 
     db.commit()
     db.refresh(invoice)
+
+    # 5. Manage Pending Review Queue Entry
+    if decision == "flag_review":
+        try:
+            from db.models import PendingReviewRecord
+            existing_pr = db.scalar(
+                select(PendingReviewRecord).where(
+                    PendingReviewRecord.invoice_id == invoice.id,
+                    PendingReviewRecord.status == "pending"
+                )
+            )
+            if not existing_pr:
+                pr = PendingReviewRecord(
+                    invoice_id=invoice.id,
+                    thread_id=thread_id,
+                    status="pending",
+                    assigned_level=level,
+                    reason=reasoning,
+                )
+                db.add(pr)
+                db.commit()
+        except Exception:
+            pass
+
     return invoice
 
 
@@ -230,14 +262,15 @@ def record_human_decision(
     reasoning: str = "",
     reviewer_name: str = "Manager",
 ) -> Optional[InvoiceRecord]:
-    """Record human reviewer decision override and log to audit trail."""
+    """Record human reviewer decision override and log to hash-chained audit trail."""
+    import hashlib
     invoice = get_invoice_by_thread_id(db, thread_id)
     if not invoice:
         return None
 
     now = utc_now()
-    final_decision = "auto_approve" if human_action == "approve" else "reject"
-    final_status = "approved_by_human" if human_action == "approve" else "rejected_by_human"
+    final_decision = "auto_approve" if human_action.lower() == "approve" else "reject"
+    final_status = "approved_by_human" if human_action.lower() == "approve" else "rejected_by_human"
 
     invoice.decision = final_decision
     invoice.status = final_status
@@ -246,11 +279,162 @@ def record_human_decision(
     invoice.review_notes = reasoning
     invoice.updated_at = now
 
+    # Compute hash chain for human action
+    prev_hash = "0" * 64
+    if invoice.audit_trail:
+        prev_hash = invoice.audit_trail[-1].entry_hash or ("0" * 64)
+    detail_str = f"Human override by {reviewer_name}: {human_action.upper()} | Notes: {reasoning or 'No notes'}"
+    chain_payload = f"{prev_hash}:human_review:{now.isoformat()}:{detail_str}".encode("utf-8")
+    entry_hash = hashlib.sha256(chain_payload).hexdigest()
+
     invoice.audit_trail.append(
         AuditTrailRecord(
             step="human_review",
             timestamp=now.isoformat(),
-            detail=f"Human override by {reviewer_name}: {human_action.upper()} | Notes: {reasoning or 'No notes'}",
+            detail=detail_str,
+            previous_hash=prev_hash,
+            entry_hash=entry_hash,
+        )
+    )
+
+    # Update pending reviews queue if present
+    try:
+        from db.models import PendingReviewRecord
+        pr = db.scalar(
+            select(PendingReviewRecord).where(
+                PendingReviewRecord.invoice_id == invoice.id,
+                PendingReviewRecord.status == "pending"
+            )
+        )
+        if pr:
+            pr.status = final_status
+            pr.reviewer_id = reviewer_name
+            pr.resolved_at = now
+    except Exception:
+        pass
+
+    db.commit()
+    db.refresh(invoice)
+    return invoice
+
+
+def submit_human_correction(
+    db: Session,
+    thread_id: str,
+    corrected_data: Dict[str, Any],
+    reviewer_name: str = "DataEntrySpecialist",
+    notes: str = "",
+) -> Tuple[Optional[InvoiceRecord], str]:
+    """
+    Safely applies human field corrections to an invoice and records audit lineage.
+    Enforces safeguards:
+      - Max 2 re-entries per case (prevents infinite loops)
+      - Separation of duties tracking (records corrector name)
+    """
+    import hashlib
+    invoice = get_invoice_by_thread_id(db, thread_id)
+    if not invoice:
+        return None, "Invoice record not found."
+
+    # Look up pending review record for reentry count
+    reentry = 0
+    try:
+        from db.models import PendingReviewRecord
+        pr = db.scalar(
+            select(PendingReviewRecord).where(
+                PendingReviewRecord.invoice_id == invoice.id
+            ).order_by(desc(PendingReviewRecord.created_at))
+        )
+        if pr:
+            reentry = pr.reentry_count
+    except Exception:
+        pass
+
+    if reentry >= 2:
+        return None, "Maximum human correction re-entry limit (2) exceeded. Must be resolved by senior manager."
+
+    now = utc_now()
+
+    # Apply corrected fields safely
+    if "vendor_name" in corrected_data:
+        invoice.vendor_name = corrected_data["vendor_name"]
+    if "invoice_number" in corrected_data:
+        invoice.invoice_number = corrected_data["invoice_number"]
+    if "total_amount" in corrected_data:
+        invoice.total_amount = float(corrected_data["total_amount"])
+    if "subtotal" in corrected_data:
+        invoice.subtotal = float(corrected_data["subtotal"])
+    if "tax_amount" in corrected_data:
+        invoice.tax_amount = float(corrected_data["tax_amount"])
+
+    invoice.status = "pending_review"
+    invoice.updated_at = now
+
+    # Audit log
+    prev_hash = invoice.audit_trail[-1].entry_hash if invoice.audit_trail else ("0" * 64)
+    detail_str = f"Human correction applied by {reviewer_name} (Loop #{reentry + 1}): {notes or 'Data adjusted'}"
+    chain_payload = f"{prev_hash}:human_correction:{now.isoformat()}:{detail_str}".encode("utf-8")
+    entry_hash = hashlib.sha256(chain_payload).hexdigest()
+
+    invoice.audit_trail.append(
+        AuditTrailRecord(
+            step="human_correction",
+            timestamp=now.isoformat(),
+            detail=detail_str,
+            previous_hash=prev_hash,
+            entry_hash=entry_hash,
+        )
+    )
+
+    try:
+        from db.models import PendingReviewRecord
+        pr = db.scalar(
+            select(PendingReviewRecord).where(
+                PendingReviewRecord.invoice_id == invoice.id
+            ).order_by(desc(PendingReviewRecord.created_at))
+        )
+        if pr:
+            pr.reentry_count = reentry + 1
+            pr.status = "corrected"
+            pr.reviewer_id = reviewer_name
+    except Exception:
+        pass
+
+    db.commit()
+    db.refresh(invoice)
+    return invoice, "Correction saved successfully."
+
+
+def reopen_rejected_case(
+    db: Session,
+    thread_id: str,
+    reviewer_name: str = "ComplianceOfficer",
+    appeal_reason: str = "",
+) -> Optional[InvoiceRecord]:
+    """Reopen a previously rejected invoice for audit appeals or review."""
+    import hashlib
+    invoice = get_invoice_by_thread_id(db, thread_id)
+    if not invoice:
+        return None
+
+    now = utc_now()
+    invoice.status = "pending_review"
+    invoice.decision = "flag_review"
+    invoice.approval_level = "director"
+    invoice.updated_at = now
+
+    prev_hash = invoice.audit_trail[-1].entry_hash if invoice.audit_trail else ("0" * 64)
+    detail_str = f"Case reopened by {reviewer_name}. Appeal reason: {appeal_reason or 'Requested review'}"
+    chain_payload = f"{prev_hash}:case_reopened:{now.isoformat()}:{detail_str}".encode("utf-8")
+    entry_hash = hashlib.sha256(chain_payload).hexdigest()
+
+    invoice.audit_trail.append(
+        AuditTrailRecord(
+            step="case_reopened",
+            timestamp=now.isoformat(),
+            detail=detail_str,
+            previous_hash=prev_hash,
+            entry_hash=entry_hash,
         )
     )
 

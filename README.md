@@ -74,22 +74,32 @@ graph TB
 ```
 Raw Invoice (PDF/Image/TXT)
   │
-  ├─► 1. Multi-Modal Extraction Node (Gemini 2.5/3.8 Flash + GitHub Models fallback with auto-retry)
+  ├─► 1. Pre-LLM Smart File Hash Gate (Zero-model-cost SHA-256 intercept with appeal/reprocess support)
   │
-  ├─► 2. Compliance Validation Node (9 Business Rules: Approved Vendors, Tax Math, Spends, Dates)
+  ├─► 2. Text Prep & Concrete Tampering Inspection (White text #FFFFFF, microscopic fonts < 3pt, covered overlays)
   │
-  ├─► 3. SHA-256 Deduplication Node (Redis cache + In-memory fallback prevents duplicate payouts)
+  ├─► 3. Primary Reader A (Multimodal Gemini 3.8 Flash vision extraction with auto-retry)
   │
-  ├─► 4. Forensic Anomaly Detection Node (Z-Scores vs historical DB records, Round Numbers, Structuring)
+  ├─► 4. Verifier Reader B (Independent text-only GitHub Models / GPT-4o-mini anchor field extraction)
   │
-  ├─► 5. Risk Scoring & Decision Routing Node (Calibrated 0.0 - 1.0 composite risk score)
-  │     ├── Risk < 0.25 & Amount ≤ 100k  ──► Auto-Approve
-  │     ├── Risk ≥ 0.70 or Tampering     ──► Auto-Reject
-  │     └── Risk ≥ 0.25 or Amount > 100k ──► Flag for Human Review (Manager / Director)
+  ├─► 5. Dual-Reader Verification & Grounding (Evidence snippet verification in raw text -> Full/Partial/None)
   │
-  ├─► 6. Human-in-the-Loop Interrupt Node (Pauses graph execution; resumes on manager decision)
+  ├─► 6. Legibility & OCR Quality Gate (Readability score calculation and tampering alert flagging)
   │
-  └─► 7. Database Persistence & Audit Trail (Full state saved to PostgreSQL/SQLite via SQLAlchemy 2.0)
+  ├─► 7. Compliance Validation Node (9 Business Rules: Approved Vendors, Tax Math, Spends, Dates)
+  │
+  ├─► 8. Semantic & Near-Duplicate Detection (Levenshtein distance checks excluding invoice's own case ID)
+  │
+  ├─► 9. 3-Tier Vendor Anomaly Detection (Tier 0 Cold-Start, Tier 1 Small-Sample, Tier 2 Empirical Z-Scores)
+  │
+  ├─► 10. Risk Scoring & Decision Routing Node (Calibrated composite risk score; enforces Auto-Approve Invariant)
+  │     ├── Risk < 0.20 & Verification == 'FULL' ──► Auto-Approve
+  │     ├── Risk ≥ 0.70 or Tampering/Duplicates  ──► Auto-Reject
+  │     └── Risk ≥ 0.20 or Partial Verification  ──► Flag for Human Review (Manager / Director)
+  │
+  ├─► 11. Human Review Queue & Correction Loop (Max 2 re-entries limit, separation of duties, case reopening)
+  │
+  └─► 12. Tamper-Evident Hash-Chained Audit Trail (Cryptographic SHA-256 running hash chain per step)
 ```
 
 ---
@@ -265,7 +275,7 @@ Transparent observability into every step executed by the LangGraph state machin
 The test suite covers data models, agent nodes, validation rules, anomaly detection, deduplication, database persistence, and the complete LangGraph workflow.
 
 ```bash
-# Run all 42 unit and integration tests
+# Run all 53 unit and integration tests
 pytest -v
 
 # Run real-world benchmark suite
@@ -289,7 +299,7 @@ doc-agent/
 ├── tools/       # Multi-modal extractors, 9-rule validator, anomaly & dedup engines
 ├── ui/          # Streamlit frontend (Document ingestion, review queue, analytics)
 ├── scripts/     # Ingestion, seeding, and downloading utilities
-├── tests/       # Pytest unit & integration test suite (42 tests)
+├── tests/       # Pytest unit & integration test suite (53 tests)
 ├── config.py    # Environment configuration & LLM provider settings
 └── docker-compose.yml # Container orchestration (API, UI, PostgreSQL, Redis)
 ```
