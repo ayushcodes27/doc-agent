@@ -65,3 +65,4 @@ temp/
 .coverage
 htmlcov/
 *.log
+.temp_edge_profile/

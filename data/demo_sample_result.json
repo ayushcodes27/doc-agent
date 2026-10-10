@@ -1,0 +1,223 @@
+{
+  "status": "completed",
+  "thread_id": "amazon_web_services.pdf",
+  "filename": "amazon_web_services.pdf",
+  "extracted_data": {
+    "vendor_name": "Amazon Web Services, Inc.",
+    "vendor_id": "US-EIN-41-1987654",
+    "invoice_number": "AWS-2026-421830",
+    "invoice_date": "2026-08-15",
+    "due_date": "2026-09-14",
+    "currency": "USD",
+    "subtotal": 350.0,
+    "tax_amount": 31.5,
+    "total_amount": 381.5,
+    "payment_terms": "Net 30 Days",
+    "confidence_score": 0.96,
+    "line_items": [
+      {
+        "description": "Amazon Elastic Compute Cloud (EC2) - Production Cluster",
+        "quantity": 1.0,
+        "unit_price": 220.0,
+        "total": 220.0
+      },
+      {
+        "description": "Amazon Simple Storage Service (S3) - Standard Storage",
+        "quantity": 1.0,
+        "unit_price": 85.0,
+        "total": 85.0
+      },
+      {
+        "description": "Amazon CloudWatch Monitoring & Metrics",
+        "quantity": 1.0,
+        "unit_price": 45.0,
+        "total": 45.0
+      }
+    ]
+  },
+  "invoice": {
+    "vendor_name": "Amazon Web Services, Inc.",
+    "vendor_id": "US-EIN-41-1987654",
+    "invoice_number": "AWS-2026-421830",
+    "invoice_date": "2026-08-15",
+    "due_date": "2026-09-14",
+    "currency": "USD",
+    "subtotal": 350.0,
+    "tax_amount": 31.5,
+    "total_amount": 381.5,
+    "payment_terms": "Net 30 Days",
+    "confidence_score": 0.96,
+    "line_items": [
+      {
+        "description": "Amazon Elastic Compute Cloud (EC2) - Production Cluster",
+        "quantity": 1.0,
+        "unit_price": 220.0,
+        "total": 220.0
+      },
+      {
+        "description": "Amazon Simple Storage Service (S3) - Standard Storage",
+        "quantity": 1.0,
+        "unit_price": 85.0,
+        "total": 85.0
+      },
+      {
+        "description": "Amazon CloudWatch Monitoring & Metrics",
+        "quantity": 1.0,
+        "unit_price": 45.0,
+        "total": 45.0
+      }
+    ]
+  },
+  "decision": "auto_approve",
+  "approval_level": "auto",
+  "risk_score": 0.05,
+  "decision_reasoning": "Low risk score (5%), full dual-reader verification confirmed, and total amount within limits.",
+  "reasoning": "Low risk score (5%), full dual-reader verification confirmed, and total amount within limits.",
+  "verification_level": "full",
+  "file_hash": "4e9d3a1b8c2f5e7a9301fd45bc8912aa67de891045231189ac5678ef1234abcd",
+  "is_duplicate": false,
+  "is_near_duplicate": false,
+  "validation_results": [
+    {
+      "rule_name": "max_amount",
+      "passed": true,
+      "severity": "error",
+      "message": "Invoice amount ($381.50) is well within limit ($500,000.00)."
+    },
+    {
+      "rule_name": "approved_vendor",
+      "passed": true,
+      "severity": "error",
+      "message": "Vendor 'Amazon Web Services, Inc.' is verified in approved registry."
+    },
+    {
+      "rule_name": "date_validity",
+      "passed": true,
+      "severity": "error",
+      "message": "Invoice date 2026-08-15 is valid."
+    },
+    {
+      "rule_name": "visual_text_consistency",
+      "passed": true,
+      "severity": "error",
+      "message": "Visual image and digital layer match."
+    },
+    {
+      "rule_name": "line_item_math",
+      "passed": true,
+      "severity": "warning",
+      "message": "Line items sum ($350.00) matches subtotal ($350.00)."
+    },
+    {
+      "rule_name": "total_math",
+      "passed": true,
+      "severity": "warning",
+      "message": "Subtotal ($350.00) + Tax ($31.50) = Total ($381.50)."
+    },
+    {
+      "rule_name": "vendor_id_present",
+      "passed": true,
+      "severity": "warning",
+      "message": "Tax ID 'US-EIN-41-1987654' verified."
+    },
+    {
+      "rule_name": "currency_consistency",
+      "passed": true,
+      "severity": "warning",
+      "message": "Currency 'USD' is a valid ISO 4217 code."
+    },
+    {
+      "rule_name": "payment_terms_check",
+      "passed": true,
+      "severity": "info",
+      "message": "Payment terms 'Net 30 Days' declared."
+    }
+  ],
+  "anomalies": [],
+  "audit_trail": [
+    {
+      "step": "file_hash_gate",
+      "timestamp": "2026-10-10T20:06:01.246932+00:00",
+      "detail": "Passed (SHA-256: 4e9d3a1b8c2f5e7a...)",
+      "previous_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+      "entry_hash": "d4c5b07d4054e0533b845310696a9b3bbd1c29cb74f343ff2ec514d218a1d01c"
+    },
+    {
+      "step": "tampering_check",
+      "timestamp": "2026-10-10T20:06:01.246975+00:00",
+      "detail": "Clean: No hidden/microscopic text layers detected (Quality Score: 0.94).",
+      "previous_hash": "d4c5b07d4054e0533b845310696a9b3bbd1c29cb74f343ff2ec514d218a1d01c",
+      "entry_hash": "a0dc6217405625502b8cde9c53d966df0a93f5402ebcf8e0272285caa8eb4524"
+    },
+    {
+      "step": "extraction",
+      "timestamp": "2026-10-10T20:06:01.246982+00:00",
+      "detail": "Successfully extracted invoice #42183017 from 'Amazon Web Services, Inc.' (4 line items, confidence=0.96)",
+      "previous_hash": "a0dc6217405625502b8cde9c53d966df0a93f5402ebcf8e0272285caa8eb4524",
+      "entry_hash": "da2252574c4f104d8e2f7418e1ad4d77b521048a9b6e7523155e0b7f9210f5a9"
+    },
+    {
+      "step": "verifier_reader_b",
+      "timestamp": "2026-10-10T20:06:01.246986+00:00",
+      "detail": "Reader B extracted anchor fields (Total: 4.11, Vendor: 'Amazon Web Services').",
+      "previous_hash": "da2252574c4f104d8e2f7418e1ad4d77b521048a9b6e7523155e0b7f9210f5a9",
+      "entry_hash": "08454640274f061418a58bfc0023df6333194cd57bb9997c4f7ca21db7a7fdac"
+    },
+    {
+      "step": "compare_and_verify",
+      "timestamp": "2026-10-10T20:06:01.246989+00:00",
+      "detail": "Verification Level: FULL | Readers agree on total (4.11), vendor, and snippets grounded.",
+      "previous_hash": "08454640274f061418a58bfc0023df6333194cd57bb9997c4f7ca21db7a7fdac",
+      "entry_hash": "607e91b7fea2407e279109b32d490047ae40a4221b8f7a545bae1d11500a40ff"
+    },
+    {
+      "step": "legibility_gate",
+      "timestamp": "2026-10-10T20:06:01.246992+00:00",
+      "detail": "Legibility gate passed (Score: 0.94, Verification: FULL).",
+      "previous_hash": "607e91b7fea2407e279109b32d490047ae40a4221b8f7a545bae1d11500a40ff",
+      "entry_hash": "6af6bcdf9c64941654198f48b1633c5ed79a30699ef419b8213bc4c6803ed45b"
+    },
+    {
+      "step": "validation",
+      "timestamp": "2026-10-10T20:06:01.246994+00:00",
+      "detail": "Evaluated 9 compliance rules (0 failed).",
+      "previous_hash": "6af6bcdf9c64941654198f48b1633c5ed79a30699ef419b8213bc4c6803ed45b",
+      "entry_hash": "8faa45a723a045291215dd442df2ff5158c923df30d34aa64fe7fa1e07236b93"
+    },
+    {
+      "step": "dedup",
+      "timestamp": "2026-10-10T20:06:01.246997+00:00",
+      "detail": "No duplicate found. Registered fingerprint.",
+      "previous_hash": "8faa45a723a045291215dd442df2ff5158c923df30d34aa64fe7fa1e07236b93",
+      "entry_hash": "2b648e617d4a5265488704fd5d938baeffa21d7d43cd6a0b93c901da28587251"
+    },
+    {
+      "step": "anomaly_detection",
+      "timestamp": "2026-10-10T20:06:01.247000+00:00",
+      "detail": "Evaluated with 14 historical records. Detected 0 statistical/pattern anomalies.",
+      "previous_hash": "2b648e617d4a5265488704fd5d938baeffa21d7d43cd6a0b93c901da28587251",
+      "entry_hash": "e63cb4cfe3e63358dce375749f425c60ac75765ed3d8d404cd5f66fb44cfe27f"
+    },
+    {
+      "step": "risk_scoring",
+      "timestamp": "2026-10-10T20:06:01.247002+00:00",
+      "detail": "Calculated aggregate risk score: 0.05",
+      "previous_hash": "e63cb4cfe3e63358dce375749f425c60ac75765ed3d8d404cd5f66fb44cfe27f",
+      "entry_hash": "ae351721976c678f86eadd1ce69023eb23a2421c90605bca9e4716ada9ce8738"
+    },
+    {
+      "step": "decision",
+      "timestamp": "2026-10-10T20:06:01.247006+00:00",
+      "detail": "Final Decision: AUTO_APPROVE | Level: AUTO | Low risk score (0.05), full verification confirmed, and total amount within limits.",
+      "previous_hash": "ae351721976c678f86eadd1ce69023eb23a2421c90605bca9e4716ada9ce8738",
+      "entry_hash": "9da364d41682201a5fee2b014a89f53fea22ae6eebbedce85e13dc1bf4b6a2d7"
+    },
+    {
+      "step": "report_generated",
+      "timestamp": "2026-10-10T20:06:01.247009+00:00",
+      "detail": "Executive processing report created.",
+      "previous_hash": "9da364d41682201a5fee2b014a89f53fea22ae6eebbedce85e13dc1bf4b6a2d7",
+      "entry_hash": "0dcc8cdff70dd09d35c8a259a507ffed42f0436e18b5704b89ab1976f701c606"
+    }
+  ]
+}

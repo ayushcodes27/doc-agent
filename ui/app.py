@@ -438,6 +438,16 @@ st.markdown(
 uploaded_file = st.file_uploader(" ", type=["pdf", "txt"], label_visibility="collapsed")
 process_clicked = st.button("Process invoice", type="primary", disabled=uploaded_file is None)
 
+# Auto-load demo sample if ?demo=1 query parameter is set
+if "result" not in st.session_state and st.query_params.get("demo"):
+    demo_file = os.path.join("data", "demo_sample_result.json")
+    if os.path.exists(demo_file):
+        try:
+            with open(demo_file, "r", encoding="utf-8") as f:
+                st.session_state.result = json.load(f)
+        except Exception:
+            pass
+
 # ----------------------------------------------------------------------------
 # Processing / Results / Empty State
 # ----------------------------------------------------------------------------
@@ -536,19 +546,23 @@ if "result" in st.session_state:
     # ---------------- Extracted data ----------------
     with col1:
         st.markdown('<p class="section-title">Extracted data</p>', unsafe_allow_html=True)
-        invoice_data = result.get("invoice")
+        invoice_data = result.get("invoice") or result.get("extracted_data")
 
         if invoice_data:
             currency = invoice_data.get("currency", "USD")
             confidence = invoice_data.get("confidence_score")
+            verif = (result.get("verification_level") or "none").upper()
+            verif_color = "#33604A" if verif == "FULL" else ("#B5751D" if verif == "PARTIAL" else "#9C3B2C")
+
+            tags_html = ""
             if confidence is not None:
                 try:
-                    st.markdown(
-                        f'<span class="confidence-tag">{float(confidence):.0%} extraction confidence</span>',
-                        unsafe_allow_html=True,
-                    )
+                    tags_html += f'<span class="confidence-tag">{float(confidence):.0%} extraction confidence</span> '
                 except (TypeError, ValueError):
                     pass
+            tags_html += f'<span style="background:{verif_color}18; color:{verif_color}; border:1px solid {verif_color}44; padding:3px 9px; border-radius:3px; font-size:0.78rem; font-weight:600;">Dual-Reader: {verif}</span>'
+            
+            st.markdown(tags_html, unsafe_allow_html=True)
 
             header_fields = [
                 ("Vendor", invoice_data.get("vendor_name")),
@@ -653,7 +667,7 @@ if "result" in st.session_state:
             if failed_count > 0:
                 issue_label = "issue needs" if failed_count == 1 else "issues need"
                 st.markdown(
-                    f'<div class="compliance-alert fail">⚠️ {failed_count} {issue_label} review</div>',
+                    f'<div class="compliance-alert fail">! {failed_count} {issue_label} review</div>',
                     unsafe_allow_html=True,
                 )
             else:
@@ -700,7 +714,8 @@ if "result" in st.session_state:
     # ---------------- Audit trail ----------------
     st.markdown('<p class="section-title" style="margin-top:2rem;">Agent audit trail</p>', unsafe_allow_html=True)
     audit_trail = result.get("audit_trail", [])
-    with st.expander("Show step-by-step log", expanded=False):
+    expanded_audit = bool(st.query_params.get("expand_audit", False))
+    with st.expander("Show step-by-step log", expanded=expanded_audit):
         if not audit_trail:
             st.markdown(
                 '<p style="color: var(--ink-soft); font-family: Inter, sans-serif; font-size: 0.85rem;">'
@@ -714,10 +729,12 @@ if "result" in st.session_state:
                 ts = (entry.get("timestamp") or "")[:19].replace("T", " ")
                 is_terminal = (idx == total_entries - 1) and status == "completed" and entry.get("step") in ["decision", "report_generated"]
                 terminal_class = "terminal" if is_terminal else ""
+                entry_hash = entry.get("entry_hash", "")
+                hash_badge = f'<span style="font-family:monospace; font-size:0.70rem; color:var(--ink-soft); margin-left:8px;" title="SHA-256: {entry_hash}">[Hash: {entry_hash[:8]}...]</span>' if entry_hash else ""
                 items_html += (
                     f'<div class="timeline-item {terminal_class}">'
                     f'<div class="timeline-ts">{esc(ts)}</div>'
-                    f'<div class="timeline-step">{esc(step_label(entry.get("step", "")))}</div>'
+                    f'<div class="timeline-step">{esc(step_label(entry.get("step", "")))} {hash_badge}</div>'
                     f'<div class="timeline-detail">{esc(entry.get("detail", ""))}</div>'
                     "</div>"
                 )
@@ -730,7 +747,15 @@ else:
     st.markdown(
         """
         <div class="empty-state">
-            <div class="empty-icon">🧾</div>
+            <div class="empty-icon">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <line x1="16" y1="13" x2="8" y2="13"></line>
+                    <line x1="16" y1="17" x2="8" y2="17"></line>
+                    <line x1="10" y1="9" x2="8" y2="9"></line>
+                </svg>
+            </div>
             <div class="empty-title">Awaiting invoice document</div>
             <div class="empty-subtitle">Upload a PDF or TXT invoice above and click <strong>Process invoice</strong> to trigger agent extraction, compliance validation, fraud screening, and routing.</div>
             <div class="empty-preview-grid">
