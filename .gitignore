@@ -1,5 +1,7 @@
 # Project-specific private documentation
 docagent_project_guide.md
+AUDIT_LOG.md
+AUDIT_README.md
 
 # Environment variables & secrets
 .env
@@ -53,9 +55,10 @@ temp/
 *.jpg
 *.jpeg
 
-# Allow documentation assets
+# Allow documentation assets and benchmark datasets
 !images/
 !images/**
+!data/real_invoices/*.pdf
 
 # Testing & Logs
 .pytest_cache/

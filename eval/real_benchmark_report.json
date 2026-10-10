@@ -1,0 +1,1593 @@
+{
+  "summary": {
+    "benchmark_timestamp": "2026-10-10T17:37:22.202396+00:00",
+    "total_documents": 16,
+    "successful_extractions": 16,
+    "extraction_success_rate": "100.0%",
+    "vendor_extraction_accuracy": "100.0%",
+    "amount_extraction_accuracy": "100.0%",
+    "date_extraction_accuracy": "100.0%",
+    "line_items_extraction_accuracy": "100.0%",
+    "average_confidence_score": 0.959,
+    "average_risk_score": 0.303,
+    "compliance_rules_evaluated": 144,
+    "compliance_pass_rate": "75.7%",
+    "decisions": {
+      "auto_approve": 1,
+      "flag_review": 15,
+      "reject": 0
+    },
+    "average_latency_seconds": 11.23,
+    "total_latency_seconds": 195.73
+  },
+  "invoices": [
+    {
+      "id": "INV-001",
+      "filename": "amazon_web_services.pdf",
+      "expected_vendor": "Amazon Web Services",
+      "category": "Cloud & Infrastructure",
+      "success": true,
+      "latency_seconds": 7.65,
+      "extracted": {
+        "vendor_name": "Amazon Web Services, Inc.",
+        "invoice_number": "42183017",
+        "invoice_date": "2014-08-03",
+        "currency": "USD",
+        "subtotal": 4.11,
+        "tax_amount": 0.0,
+        "total_amount": 4.11,
+        "line_items_count": 4,
+        "confidence_score": 0.95
+      },
+      "completeness": {
+        "has_vendor": true,
+        "has_amount": true,
+        "has_date": true,
+        "has_invoice_number": true,
+        "has_line_items": true
+      },
+      "compliance": {
+        "total_rules": 9,
+        "passed_rules": 7,
+        "failed_rules": 2,
+        "rules": [
+          {
+            "passed": true,
+            "rule_name": "max_amount",
+            "message": "Invoice amount (4.11) is within limit (500,000.00)",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "approved_vendor",
+            "message": "Vendor 'Amazon Web Services, Inc.' is in approved list.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "date_validity",
+            "message": "Invoice date 2014-08-03 is valid.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "line_item_math",
+            "message": "Line items sum (4.11) matches subtotal (4.11).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "total_math",
+            "message": "Subtotal (4.11) + Tax (0.00) matches Total (4.11).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "visual_text_consistency",
+            "message": "Visual scan amount is consistent with digital text line items.",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "vendor_id_present",
+            "message": "Vendor did not provide a tax/registration ID (GSTIN, VAT, etc.).",
+            "severity": "warning"
+          },
+          {
+            "passed": false,
+            "rule_name": "payment_terms_check",
+            "message": "No payment terms specified on this invoice.",
+            "severity": "info"
+          },
+          {
+            "passed": true,
+            "rule_name": "currency_consistency",
+            "message": "Currency 'USD' is a recognized ISO 4217 code.",
+            "severity": "warning"
+          }
+        ]
+      },
+      "anomalies": {
+        "count": 0,
+        "items": []
+      },
+      "decision": {
+        "outcome": "auto_approve",
+        "approval_level": "auto",
+        "risk_score": 0.1,
+        "reasoning": "Low risk score (0.10) and total amount within limits."
+      },
+      "audit_trail_steps": 7
+    },
+    {
+      "id": "INV-002",
+      "filename": "azure_interior_goods.pdf",
+      "expected_vendor": "Azure Interior / Acme",
+      "category": "Supplies & Materials",
+      "success": true,
+      "latency_seconds": 12.22,
+      "extracted": {
+        "vendor_name": "Azure Interior",
+        "invoice_number": "INV/2023/03/0008",
+        "invoice_date": "2023-03-20",
+        "currency": "USD",
+        "subtotal": 262.9,
+        "tax_amount": 16.94,
+        "total_amount": 279.84,
+        "line_items_count": 4,
+        "confidence_score": 0.95
+      },
+      "completeness": {
+        "has_vendor": true,
+        "has_amount": true,
+        "has_date": true,
+        "has_invoice_number": true,
+        "has_line_items": true
+      },
+      "compliance": {
+        "total_rules": 9,
+        "passed_rules": 7,
+        "failed_rules": 2,
+        "rules": [
+          {
+            "passed": true,
+            "rule_name": "max_amount",
+            "message": "Invoice amount (279.84) is within limit (500,000.00)",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "approved_vendor",
+            "message": "Vendor 'Azure Interior' is NOT in the approved vendor list.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "date_validity",
+            "message": "Invoice date 2023-03-20 is valid.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "line_item_math",
+            "message": "Line items sum (262.90) matches subtotal (262.90).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "total_math",
+            "message": "Subtotal (262.90) + Tax (16.94) matches Total (279.84).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "visual_text_consistency",
+            "message": "Visual scan amount is consistent with digital text line items.",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "vendor_id_present",
+            "message": "Vendor did not provide a tax/registration ID (GSTIN, VAT, etc.).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "payment_terms_check",
+            "message": "Payment terms specified: '15 Days'.",
+            "severity": "info"
+          },
+          {
+            "passed": true,
+            "rule_name": "currency_consistency",
+            "message": "Currency 'USD' is a recognized ISO 4217 code.",
+            "severity": "warning"
+          }
+        ]
+      },
+      "anomalies": {
+        "count": 0,
+        "items": []
+      },
+      "decision": {
+        "outcome": "flag_review",
+        "approval_level": "manager",
+        "risk_score": 0.35,
+        "reasoning": "Moderate risk score (0.35) requires human review by Manager."
+      },
+      "audit_trail_steps": 5
+    },
+    {
+      "id": "INV-003",
+      "filename": "flipkart_b2b_retail.pdf",
+      "expected_vendor": "WS Retail (Flipkart)",
+      "category": "E-Commerce / B2B Supply",
+      "success": true,
+      "latency_seconds": 7.88,
+      "extracted": {
+        "vendor_name": "WS Retail Services Pvt. Ltd.",
+        "invoice_number": "BLR_WFLD20151000982590",
+        "invoice_date": "2015-10-20",
+        "currency": "INR",
+        "subtotal": 278.61,
+        "tax_amount": 40.39,
+        "total_amount": 319.0,
+        "line_items_count": 1,
+        "confidence_score": 0.95
+      },
+      "completeness": {
+        "has_vendor": true,
+        "has_amount": true,
+        "has_date": true,
+        "has_invoice_number": true,
+        "has_line_items": true
+      },
+      "compliance": {
+        "total_rules": 9,
+        "passed_rules": 6,
+        "failed_rules": 3,
+        "rules": [
+          {
+            "passed": true,
+            "rule_name": "max_amount",
+            "message": "Invoice amount (319.00) is within limit (500,000.00)",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "approved_vendor",
+            "message": "Vendor 'WS Retail Services Pvt. Ltd.' is NOT in the approved vendor list.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "date_validity",
+            "message": "Invoice date 2015-10-20 is valid.",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "line_item_math",
+            "message": "Line items sum (319.00) does not match subtotal (278.61).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "total_math",
+            "message": "Subtotal (278.61) + Tax (40.39) matches Total (319.00).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "visual_text_consistency",
+            "message": "Visual scan amount is consistent with digital text line items.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "vendor_id_present",
+            "message": "Vendor ID/GSTIN present: '29670869006'.",
+            "severity": "warning"
+          },
+          {
+            "passed": false,
+            "rule_name": "payment_terms_check",
+            "message": "No payment terms specified on this invoice.",
+            "severity": "info"
+          },
+          {
+            "passed": true,
+            "rule_name": "currency_consistency",
+            "message": "Currency 'INR' is a recognized ISO 4217 code.",
+            "severity": "warning"
+          }
+        ]
+      },
+      "anomalies": {
+        "count": 0,
+        "items": []
+      },
+      "decision": {
+        "outcome": "flag_review",
+        "approval_level": "manager",
+        "risk_score": 0.35,
+        "reasoning": "Moderate risk score (0.35) requires human review by Manager."
+      },
+      "audit_trail_steps": 5
+    },
+    {
+      "id": "INV-004",
+      "filename": "netpresse_it_consulting.pdf",
+      "expected_vendor": "Alexinux / Netpresse",
+      "category": "IT & Consulting",
+      "success": true,
+      "latency_seconds": 8.31,
+      "extracted": {
+        "vendor_name": "NETPRESSE",
+        "invoice_number": "2022089083",
+        "invoice_date": "2022-11-28",
+        "currency": "EUR",
+        "subtotal": 46.68,
+        "tax_amount": 9.34,
+        "total_amount": 56.02,
+        "line_items_count": 3,
+        "confidence_score": 0.98
+      },
+      "completeness": {
+        "has_vendor": true,
+        "has_amount": true,
+        "has_date": true,
+        "has_invoice_number": true,
+        "has_line_items": true
+      },
+      "compliance": {
+        "total_rules": 9,
+        "passed_rules": 7,
+        "failed_rules": 2,
+        "rules": [
+          {
+            "passed": true,
+            "rule_name": "max_amount",
+            "message": "Invoice amount (56.02) is within limit (500,000.00)",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "approved_vendor",
+            "message": "Vendor 'NETPRESSE' is NOT in the approved vendor list.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "date_validity",
+            "message": "Invoice date 2022-11-28 is valid.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "line_item_math",
+            "message": "Line items sum (46.68) matches subtotal (46.68).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "total_math",
+            "message": "Subtotal (46.68) + Tax (9.34) matches Total (56.02).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "visual_text_consistency",
+            "message": "Visual scan amount is consistent with digital text line items.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "vendor_id_present",
+            "message": "Vendor ID/GSTIN present: 'F63530848134'.",
+            "severity": "warning"
+          },
+          {
+            "passed": false,
+            "rule_name": "payment_terms_check",
+            "message": "No payment terms specified on this invoice.",
+            "severity": "info"
+          },
+          {
+            "passed": true,
+            "rule_name": "currency_consistency",
+            "message": "Currency 'EUR' is a recognized ISO 4217 code.",
+            "severity": "warning"
+          }
+        ]
+      },
+      "anomalies": {
+        "count": 0,
+        "items": []
+      },
+      "decision": {
+        "outcome": "flag_review",
+        "approval_level": "manager",
+        "risk_score": 0.25,
+        "reasoning": "Moderate risk score (0.25) requires human review by Manager."
+      },
+      "audit_trail_steps": 5
+    },
+    {
+      "id": "INV-005",
+      "filename": "quality_hosting_servers.pdf",
+      "expected_vendor": "QualityHosting AG",
+      "category": "Hosting & Data Center",
+      "success": true,
+      "latency_seconds": 17.87,
+      "extracted": {
+        "vendor_name": "QualityHosting AG",
+        "invoice_number": "30064443",
+        "invoice_date": "2014-05-07",
+        "currency": "EUR",
+        "subtotal": 34.73,
+        "tax_amount": 0.0,
+        "total_amount": 34.73,
+        "line_items_count": 7,
+        "confidence_score": 0.98
+      },
+      "completeness": {
+        "has_vendor": true,
+        "has_amount": true,
+        "has_date": true,
+        "has_invoice_number": true,
+        "has_line_items": true
+      },
+      "compliance": {
+        "total_rules": 9,
+        "passed_rules": 8,
+        "failed_rules": 1,
+        "rules": [
+          {
+            "passed": true,
+            "rule_name": "max_amount",
+            "message": "Invoice amount (34.73) is within limit (500,000.00)",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "approved_vendor",
+            "message": "Vendor 'QualityHosting AG' is NOT in the approved vendor list.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "date_validity",
+            "message": "Invoice date 2014-05-07 is valid.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "line_item_math",
+            "message": "Line items sum (34.73) matches subtotal (34.73).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "total_math",
+            "message": "Subtotal (34.73) + Tax (0.00) matches Total (34.73).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "visual_text_consistency",
+            "message": "Visual scan amount is consistent with digital text line items.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "vendor_id_present",
+            "message": "Vendor ID/GSTIN present: 'DE 232 446 240'.",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "payment_terms_check",
+            "message": "Payment terms specified: '14 Tage netto'.",
+            "severity": "info"
+          },
+          {
+            "passed": true,
+            "rule_name": "currency_consistency",
+            "message": "Currency 'EUR' is a recognized ISO 4217 code.",
+            "severity": "warning"
+          }
+        ]
+      },
+      "anomalies": {
+        "count": 0,
+        "items": []
+      },
+      "decision": {
+        "outcome": "flag_review",
+        "approval_level": "manager",
+        "risk_score": 0.25,
+        "reasoning": "Moderate risk score (0.25) requires human review by Manager."
+      },
+      "audit_trail_steps": 5
+    },
+    {
+      "id": "INV-006",
+      "filename": "sammy_maystone_supplies.pdf",
+      "expected_vendor": "Sammy Maystone",
+      "category": "Office & Industrial Supplies",
+      "success": true,
+      "latency_seconds": 7.02,
+      "extracted": {
+        "vendor_name": "Sammy Maystone",
+        "invoice_number": "invoice_number_1",
+        "invoice_date": "2022-01-01",
+        "currency": "USD",
+        "subtotal": 127.5,
+        "tax_amount": 0.0,
+        "total_amount": 127.5,
+        "line_items_count": 2,
+        "confidence_score": 0.98
+      },
+      "completeness": {
+        "has_vendor": true,
+        "has_amount": true,
+        "has_date": true,
+        "has_invoice_number": true,
+        "has_line_items": true
+      },
+      "compliance": {
+        "total_rules": 9,
+        "passed_rules": 7,
+        "failed_rules": 2,
+        "rules": [
+          {
+            "passed": true,
+            "rule_name": "max_amount",
+            "message": "Invoice amount (127.50) is within limit (500,000.00)",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "approved_vendor",
+            "message": "Vendor 'Sammy Maystone' is NOT in the approved vendor list.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "date_validity",
+            "message": "Invoice date 2022-01-01 is valid.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "line_item_math",
+            "message": "Line items sum (127.50) matches subtotal (127.50).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "total_math",
+            "message": "Subtotal (127.50) + Tax (0.00) matches Total (127.50).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "visual_text_consistency",
+            "message": "Visual scan amount is consistent with digital text line items.",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "vendor_id_present",
+            "message": "Vendor did not provide a tax/registration ID (GSTIN, VAT, etc.).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "payment_terms_check",
+            "message": "Payment terms specified: 'Net 30 days'.",
+            "severity": "info"
+          },
+          {
+            "passed": true,
+            "rule_name": "currency_consistency",
+            "message": "Currency 'USD' is a recognized ISO 4217 code.",
+            "severity": "warning"
+          }
+        ]
+      },
+      "anomalies": {
+        "count": 0,
+        "items": []
+      },
+      "decision": {
+        "outcome": "flag_review",
+        "approval_level": "manager",
+        "risk_score": 0.35,
+        "reasoning": "Moderate risk score (0.35) requires human review by Manager."
+      },
+      "audit_trail_steps": 5
+    },
+    {
+      "id": "INV-007",
+      "filename": "coolblue_hardware_tablet.pdf",
+      "expected_vendor": "Coolblue B.V.",
+      "category": "Hardware & Devices",
+      "success": true,
+      "latency_seconds": 14.93,
+      "extracted": {
+        "vendor_name": "Coolblue B.V.",
+        "invoice_number": "993548900",
+        "invoice_date": "2014-04-19",
+        "currency": "EUR",
+        "subtotal": 593.36,
+        "tax_amount": 124.61,
+        "total_amount": 717.97,
+        "line_items_count": 5,
+        "confidence_score": 0.98
+      },
+      "completeness": {
+        "has_vendor": true,
+        "has_amount": true,
+        "has_date": true,
+        "has_invoice_number": true,
+        "has_line_items": true
+      },
+      "compliance": {
+        "total_rules": 9,
+        "passed_rules": 7,
+        "failed_rules": 2,
+        "rules": [
+          {
+            "passed": true,
+            "rule_name": "max_amount",
+            "message": "Invoice amount (717.97) is within limit (500,000.00)",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "approved_vendor",
+            "message": "Vendor 'Coolblue B.V.' is NOT in the approved vendor list.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "date_validity",
+            "message": "Invoice date 2014-04-19 is valid.",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "line_item_math",
+            "message": "Line items sum (717.97) does not match subtotal (593.36).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "total_math",
+            "message": "Subtotal (593.36) + Tax (124.61) matches Total (717.97).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "visual_text_consistency",
+            "message": "Visual scan amount is consistent with digital text line items.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "vendor_id_present",
+            "message": "Vendor ID/GSTIN present: 'NL810433941B01'.",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "payment_terms_check",
+            "message": "Payment terms specified: 'iDEAL'.",
+            "severity": "info"
+          },
+          {
+            "passed": true,
+            "rule_name": "currency_consistency",
+            "message": "Currency 'EUR' is a recognized ISO 4217 code.",
+            "severity": "warning"
+          }
+        ]
+      },
+      "anomalies": {
+        "count": 0,
+        "items": []
+      },
+      "decision": {
+        "outcome": "flag_review",
+        "approval_level": "manager",
+        "risk_score": 0.35,
+        "reasoning": "Moderate risk score (0.35) requires human review by Manager."
+      },
+      "audit_trail_steps": 5
+    },
+    {
+      "id": "INV-008",
+      "filename": "coolblue_hardware_laptop.pdf",
+      "expected_vendor": "Coolblue B.V.",
+      "category": "Hardware & Devices",
+      "success": true,
+      "latency_seconds": 30.31,
+      "extracted": {
+        "vendor_name": "Coolblue B.V.",
+        "invoice_number": "992288600",
+        "invoice_date": "2014-03-29",
+        "currency": "EUR",
+        "subtotal": 4053.67,
+        "tax_amount": 851.27,
+        "total_amount": 4904.94,
+        "line_items_count": 7,
+        "confidence_score": 0.95
+      },
+      "completeness": {
+        "has_vendor": true,
+        "has_amount": true,
+        "has_date": true,
+        "has_invoice_number": true,
+        "has_line_items": true
+      },
+      "compliance": {
+        "total_rules": 9,
+        "passed_rules": 7,
+        "failed_rules": 2,
+        "rules": [
+          {
+            "passed": true,
+            "rule_name": "max_amount",
+            "message": "Invoice amount (4,904.94) is within limit (500,000.00)",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "approved_vendor",
+            "message": "Vendor 'Coolblue B.V.' is NOT in the approved vendor list.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "date_validity",
+            "message": "Invoice date 2014-03-29 is valid.",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "line_item_math",
+            "message": "Line items sum (4,904.94) does not match subtotal (4,053.67).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "total_math",
+            "message": "Subtotal (4,053.67) + Tax (851.27) matches Total (4,904.94).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "visual_text_consistency",
+            "message": "Visual scan amount is consistent with digital text line items.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "vendor_id_present",
+            "message": "Vendor ID/GSTIN present: 'NL810433941B01'.",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "payment_terms_check",
+            "message": "Payment terms specified: 'iDEAL'.",
+            "severity": "info"
+          },
+          {
+            "passed": true,
+            "rule_name": "currency_consistency",
+            "message": "Currency 'EUR' is a recognized ISO 4217 code.",
+            "severity": "warning"
+          }
+        ]
+      },
+      "anomalies": {
+        "count": 0,
+        "items": []
+      },
+      "decision": {
+        "outcome": "flag_review",
+        "approval_level": "manager",
+        "risk_score": 0.35,
+        "reasoning": "Moderate risk score (0.35) requires human review by Manager."
+      },
+      "audit_trail_steps": 5
+    },
+    {
+      "id": "INV-009",
+      "filename": "free_telecom_broadband.pdf",
+      "expected_vendor": "Free Telecom",
+      "category": "Telecom & Connectivity",
+      "success": true,
+      "latency_seconds": 7.55,
+      "extracted": {
+        "vendor_name": "Free",
+        "invoice_number": "562044387",
+        "invoice_date": "2015-07-02",
+        "currency": "EUR",
+        "subtotal": 24.99,
+        "tax_amount": 5.0,
+        "total_amount": 29.99,
+        "line_items_count": 1,
+        "confidence_score": 0.98
+      },
+      "completeness": {
+        "has_vendor": true,
+        "has_amount": true,
+        "has_date": true,
+        "has_invoice_number": true,
+        "has_line_items": true
+      },
+      "compliance": {
+        "total_rules": 9,
+        "passed_rules": 8,
+        "failed_rules": 1,
+        "rules": [
+          {
+            "passed": true,
+            "rule_name": "max_amount",
+            "message": "Invoice amount (29.99) is within limit (500,000.00)",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "approved_vendor",
+            "message": "Vendor 'Free' is NOT in the approved vendor list.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "date_validity",
+            "message": "Invoice date 2015-07-02 is valid.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "line_item_math",
+            "message": "Line items sum (24.99) matches subtotal (24.99).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "total_math",
+            "message": "Subtotal (24.99) + Tax (5.00) matches Total (29.99).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "visual_text_consistency",
+            "message": "Visual scan amount is consistent with digital text line items.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "vendor_id_present",
+            "message": "Vendor ID/GSTIN present: 'FR 604 219 388 61'.",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "payment_terms_check",
+            "message": "Payment terms specified: 'Prélèvement automatique'.",
+            "severity": "info"
+          },
+          {
+            "passed": true,
+            "rule_name": "currency_consistency",
+            "message": "Currency 'EUR' is a recognized ISO 4217 code.",
+            "severity": "warning"
+          }
+        ]
+      },
+      "anomalies": {
+        "count": 0,
+        "items": []
+      },
+      "decision": {
+        "outcome": "flag_review",
+        "approval_level": "manager",
+        "risk_score": 0.25,
+        "reasoning": "Moderate risk score (0.25) requires human review by Manager."
+      },
+      "audit_trail_steps": 5
+    },
+    {
+      "id": "INV-010",
+      "filename": "oyo_corporate_stay.pdf",
+      "expected_vendor": "OYO Rooms",
+      "category": "Travel & Corporate Stays",
+      "success": true,
+      "latency_seconds": 5.87,
+      "extracted": {
+        "vendor_name": "Oravel Stays Private Limited",
+        "invoice_number": "IBZY2087",
+        "invoice_date": "2017-12-31",
+        "currency": "INR",
+        "subtotal": 1939.0,
+        "tax_amount": 0.0,
+        "total_amount": 1939.0,
+        "line_items_count": 1,
+        "confidence_score": 0.95
+      },
+      "completeness": {
+        "has_vendor": true,
+        "has_amount": true,
+        "has_date": true,
+        "has_invoice_number": true,
+        "has_line_items": true
+      },
+      "compliance": {
+        "total_rules": 9,
+        "passed_rules": 7,
+        "failed_rules": 2,
+        "rules": [
+          {
+            "passed": true,
+            "rule_name": "max_amount",
+            "message": "Invoice amount (1,939.00) is within limit (500,000.00)",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "approved_vendor",
+            "message": "Vendor 'Oravel Stays Private Limited' is NOT in the approved vendor list.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "date_validity",
+            "message": "Invoice date 2017-12-31 is valid.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "line_item_math",
+            "message": "Line items sum (1,939.00) matches subtotal (1,939.00).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "total_math",
+            "message": "Subtotal (1,939.00) + Tax (0.00) matches Total (1,939.00).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "visual_text_consistency",
+            "message": "Visual scan amount is consistent with digital text line items.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "vendor_id_present",
+            "message": "Vendor ID/GSTIN present: '06AABCO6063D1ZQ'.",
+            "severity": "warning"
+          },
+          {
+            "passed": false,
+            "rule_name": "payment_terms_check",
+            "message": "No payment terms specified on this invoice.",
+            "severity": "info"
+          },
+          {
+            "passed": true,
+            "rule_name": "currency_consistency",
+            "message": "Currency 'INR' is a recognized ISO 4217 code.",
+            "severity": "warning"
+          }
+        ]
+      },
+      "anomalies": {
+        "count": 0,
+        "items": []
+      },
+      "decision": {
+        "outcome": "flag_review",
+        "approval_level": "manager",
+        "risk_score": 0.25,
+        "reasoning": "Moderate risk score (0.25) requires human review by Manager."
+      },
+      "audit_trail_steps": 5
+    },
+    {
+      "id": "INV-011",
+      "filename": "bol_logistics_deliveries.pdf",
+      "expected_vendor": "Bol Logistics / Camelot",
+      "category": "Logistics & Shipping",
+      "success": true,
+      "latency_seconds": 6.49,
+      "extracted": {
+        "vendor_name": "bol.com b.v.",
+        "invoice_number": "8587333880016",
+        "invoice_date": "2015-10-29",
+        "currency": "EUR",
+        "subtotal": 156.2,
+        "tax_amount": 32.8,
+        "total_amount": 189.0,
+        "line_items_count": 1,
+        "confidence_score": 0.95
+      },
+      "completeness": {
+        "has_vendor": true,
+        "has_amount": true,
+        "has_date": true,
+        "has_invoice_number": true,
+        "has_line_items": true
+      },
+      "compliance": {
+        "total_rules": 9,
+        "passed_rules": 7,
+        "failed_rules": 2,
+        "rules": [
+          {
+            "passed": true,
+            "rule_name": "max_amount",
+            "message": "Invoice amount (189.00) is within limit (500,000.00)",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "approved_vendor",
+            "message": "Vendor 'bol.com b.v.' is NOT in the approved vendor list.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "date_validity",
+            "message": "Invoice date 2015-10-29 is valid.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "line_item_math",
+            "message": "Line items sum (156.20) matches subtotal (156.20).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "total_math",
+            "message": "Subtotal (156.20) + Tax (32.80) matches Total (189.00).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "visual_text_consistency",
+            "message": "Visual scan amount is consistent with digital text line items.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "vendor_id_present",
+            "message": "Vendor ID/GSTIN present: 'NL820471616B01'.",
+            "severity": "warning"
+          },
+          {
+            "passed": false,
+            "rule_name": "payment_terms_check",
+            "message": "No payment terms specified on this invoice.",
+            "severity": "info"
+          },
+          {
+            "passed": true,
+            "rule_name": "currency_consistency",
+            "message": "Currency 'EUR' is a recognized ISO 4217 code.",
+            "severity": "warning"
+          }
+        ]
+      },
+      "anomalies": {
+        "count": 0,
+        "items": []
+      },
+      "decision": {
+        "outcome": "flag_review",
+        "approval_level": "manager",
+        "risk_score": 0.25,
+        "reasoning": "Moderate risk score (0.25) requires human review by Manager."
+      },
+      "audit_trail_steps": 5
+    },
+    {
+      "id": "INV-012",
+      "filename": "circle_business_services.pdf",
+      "expected_vendor": "Circle B.V.",
+      "category": "Business Services",
+      "success": true,
+      "latency_seconds": 10.39,
+      "extracted": {
+        "vendor_name": "circle.com b.v.",
+        "invoice_number": "3906541086000",
+        "invoice_date": "2022-04-20",
+        "currency": "EUR",
+        "subtotal": 18.6,
+        "tax_amount": 3.9,
+        "total_amount": 22.5,
+        "line_items_count": 2,
+        "confidence_score": 0.95
+      },
+      "completeness": {
+        "has_vendor": true,
+        "has_amount": true,
+        "has_date": true,
+        "has_invoice_number": true,
+        "has_line_items": true
+      },
+      "compliance": {
+        "total_rules": 9,
+        "passed_rules": 6,
+        "failed_rules": 3,
+        "rules": [
+          {
+            "passed": true,
+            "rule_name": "max_amount",
+            "message": "Invoice amount (22.50) is within limit (500,000.00)",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "approved_vendor",
+            "message": "Vendor 'circle.com b.v.' is NOT in the approved vendor list.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "date_validity",
+            "message": "Invoice date 2022-04-20 is valid.",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "line_item_math",
+            "message": "Line items sum (22.50) does not match subtotal (18.60).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "total_math",
+            "message": "Subtotal (18.60) + Tax (3.90) matches Total (22.50).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "visual_text_consistency",
+            "message": "Visual scan amount is consistent with digital text line items.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "vendor_id_present",
+            "message": "Vendor ID/GSTIN present: 'NL8204.71.616.B.02'.",
+            "severity": "warning"
+          },
+          {
+            "passed": false,
+            "rule_name": "payment_terms_check",
+            "message": "No payment terms specified on this invoice.",
+            "severity": "info"
+          },
+          {
+            "passed": true,
+            "rule_name": "currency_consistency",
+            "message": "Currency 'EUR' is a recognized ISO 4217 code.",
+            "severity": "warning"
+          }
+        ]
+      },
+      "anomalies": {
+        "count": 0,
+        "items": []
+      },
+      "decision": {
+        "outcome": "flag_review",
+        "approval_level": "manager",
+        "risk_score": 0.35,
+        "reasoning": "Moderate risk score (0.35) requires human review by Manager."
+      },
+      "audit_trail_steps": 5
+    },
+    {
+      "id": "INV-013",
+      "filename": "contoso_consulting_multipage.pdf",
+      "expected_vendor": "Contoso Ltd / Sharp Consulting",
+      "category": "Enterprise Consulting",
+      "success": true,
+      "latency_seconds": 11.95,
+      "extracted": {
+        "vendor_name": "CONTOSO",
+        "invoice_number": "3847193",
+        "invoice_date": "2024-05-16",
+        "currency": "GBP",
+        "subtotal": 1075.7,
+        "tax_amount": 0.0,
+        "total_amount": 1075.7,
+        "line_items_count": 11,
+        "confidence_score": 0.95
+      },
+      "completeness": {
+        "has_vendor": true,
+        "has_amount": true,
+        "has_date": true,
+        "has_invoice_number": true,
+        "has_line_items": true
+      },
+      "compliance": {
+        "total_rules": 9,
+        "passed_rules": 7,
+        "failed_rules": 2,
+        "rules": [
+          {
+            "passed": true,
+            "rule_name": "max_amount",
+            "message": "Invoice amount (1,075.70) is within limit (500,000.00)",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "approved_vendor",
+            "message": "Vendor 'CONTOSO' is NOT in the approved vendor list.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "date_validity",
+            "message": "Invoice date 2024-05-16 is valid.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "line_item_math",
+            "message": "Line items sum (1,075.70) matches subtotal (1,075.70).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "total_math",
+            "message": "Subtotal (1,075.70) + Tax (0.00) matches Total (1,075.70).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "visual_text_consistency",
+            "message": "Visual scan amount is consistent with digital text line items.",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "vendor_id_present",
+            "message": "Vendor did not provide a tax/registration ID (GSTIN, VAT, etc.).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "payment_terms_check",
+            "message": "Payment terms specified: 'Payable on or before 5/24/2024'.",
+            "severity": "info"
+          },
+          {
+            "passed": true,
+            "rule_name": "currency_consistency",
+            "message": "Currency 'GBP' is a recognized ISO 4217 code.",
+            "severity": "warning"
+          }
+        ]
+      },
+      "anomalies": {
+        "count": 0,
+        "items": []
+      },
+      "decision": {
+        "outcome": "flag_review",
+        "approval_level": "manager",
+        "risk_score": 0.35,
+        "reasoning": "Moderate risk score (0.35) requires human review by Manager."
+      },
+      "audit_trail_steps": 5
+    },
+    {
+      "id": "INV-014",
+      "filename": "microsoft_contoso_enterprise.pdf",
+      "expected_vendor": "Contoso Ltd / Microsoft Corp",
+      "category": "Software & Enterprise",
+      "success": true,
+      "latency_seconds": 20.35,
+      "extracted": {
+        "vendor_name": "CONTOSO LTD.",
+        "invoice_number": "INV-100",
+        "invoice_date": "2019-11-15",
+        "currency": "USD",
+        "subtotal": 100.0,
+        "tax_amount": 10.0,
+        "total_amount": 110.0,
+        "line_items_count": 1,
+        "confidence_score": 0.95
+      },
+      "completeness": {
+        "has_vendor": true,
+        "has_amount": true,
+        "has_date": true,
+        "has_invoice_number": true,
+        "has_line_items": true
+      },
+      "compliance": {
+        "total_rules": 9,
+        "passed_rules": 6,
+        "failed_rules": 3,
+        "rules": [
+          {
+            "passed": true,
+            "rule_name": "max_amount",
+            "message": "Invoice amount (110.00) is within limit (500,000.00)",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "approved_vendor",
+            "message": "Vendor 'CONTOSO LTD.' is NOT in the approved vendor list.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "date_validity",
+            "message": "Invoice date 2019-11-15 is valid.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "line_item_math",
+            "message": "Line items sum (100.00) matches subtotal (100.00).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "total_math",
+            "message": "Subtotal (100.00) + Tax (10.00) matches Total (110.00).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "visual_text_consistency",
+            "message": "Visual scan amount is consistent with digital text line items.",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "vendor_id_present",
+            "message": "Vendor did not provide a tax/registration ID (GSTIN, VAT, etc.).",
+            "severity": "warning"
+          },
+          {
+            "passed": false,
+            "rule_name": "payment_terms_check",
+            "message": "No payment terms specified on this invoice.",
+            "severity": "info"
+          },
+          {
+            "passed": true,
+            "rule_name": "currency_consistency",
+            "message": "Currency 'USD' is a recognized ISO 4217 code.",
+            "severity": "warning"
+          }
+        ]
+      },
+      "anomalies": {
+        "count": 0,
+        "items": []
+      },
+      "decision": {
+        "outcome": "flag_review",
+        "approval_level": "manager",
+        "risk_score": 0.35,
+        "reasoning": "Moderate risk score (0.35) requires human review by Manager."
+      },
+      "audit_trail_steps": 5
+    },
+    {
+      "id": "INV-015",
+      "filename": "excid3_b2b_service.pdf",
+      "expected_vendor": "Example B2B Services",
+      "category": "Professional Services",
+      "success": true,
+      "latency_seconds": 5.12,
+      "extracted": {
+        "vendor_name": "Example, LLC",
+        "invoice_number": "123",
+        "invoice_date": "2026-09-21",
+        "currency": "USD",
+        "subtotal": 19.0,
+        "tax_amount": 0.0,
+        "total_amount": 19.0,
+        "line_items_count": 1,
+        "confidence_score": 0.95
+      },
+      "completeness": {
+        "has_vendor": true,
+        "has_amount": true,
+        "has_date": true,
+        "has_invoice_number": true,
+        "has_line_items": true
+      },
+      "compliance": {
+        "total_rules": 9,
+        "passed_rules": 6,
+        "failed_rules": 3,
+        "rules": [
+          {
+            "passed": true,
+            "rule_name": "max_amount",
+            "message": "Invoice amount (19.00) is within limit (500,000.00)",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "approved_vendor",
+            "message": "Vendor 'Example, LLC' is NOT in the approved vendor list.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "date_validity",
+            "message": "Invoice date 2026-09-21 is valid.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "line_item_math",
+            "message": "Line items sum (19.00) matches subtotal (19.00).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "total_math",
+            "message": "Subtotal (19.00) + Tax (0.00) matches Total (19.00).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "visual_text_consistency",
+            "message": "Visual scan amount is consistent with digital text line items.",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "vendor_id_present",
+            "message": "Vendor did not provide a tax/registration ID (GSTIN, VAT, etc.).",
+            "severity": "warning"
+          },
+          {
+            "passed": false,
+            "rule_name": "payment_terms_check",
+            "message": "No payment terms specified on this invoice.",
+            "severity": "info"
+          },
+          {
+            "passed": true,
+            "rule_name": "currency_consistency",
+            "message": "Currency 'USD' is a recognized ISO 4217 code.",
+            "severity": "warning"
+          }
+        ]
+      },
+      "anomalies": {
+        "count": 0,
+        "items": []
+      },
+      "decision": {
+        "outcome": "flag_review",
+        "approval_level": "manager",
+        "risk_score": 0.35,
+        "reasoning": "Moderate risk score (0.35) requires human review by Manager."
+      },
+      "audit_trail_steps": 5
+    },
+    {
+      "id": "INV-016",
+      "filename": "excid3_periodic_statement.pdf",
+      "expected_vendor": "Example Recurring Services",
+      "category": "Recurring Billing / Statement",
+      "success": true,
+      "latency_seconds": 5.74,
+      "extracted": {
+        "vendor_name": "GO RAILS",
+        "invoice_number": "123",
+        "invoice_date": "2026-09-21",
+        "currency": "USD",
+        "subtotal": 19.0,
+        "tax_amount": 0.0,
+        "total_amount": 19.0,
+        "line_items_count": 1,
+        "confidence_score": 0.95
+      },
+      "completeness": {
+        "has_vendor": true,
+        "has_amount": true,
+        "has_date": true,
+        "has_invoice_number": true,
+        "has_line_items": true
+      },
+      "compliance": {
+        "total_rules": 9,
+        "passed_rules": 6,
+        "failed_rules": 3,
+        "rules": [
+          {
+            "passed": true,
+            "rule_name": "max_amount",
+            "message": "Invoice amount (19.00) is within limit (500,000.00)",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "approved_vendor",
+            "message": "Vendor 'GO RAILS' is NOT in the approved vendor list.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "date_validity",
+            "message": "Invoice date 2026-09-21 is valid.",
+            "severity": "error"
+          },
+          {
+            "passed": true,
+            "rule_name": "line_item_math",
+            "message": "Line items sum (19.00) matches subtotal (19.00).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "total_math",
+            "message": "Subtotal (19.00) + Tax (0.00) matches Total (19.00).",
+            "severity": "warning"
+          },
+          {
+            "passed": true,
+            "rule_name": "visual_text_consistency",
+            "message": "Visual scan amount is consistent with digital text line items.",
+            "severity": "error"
+          },
+          {
+            "passed": false,
+            "rule_name": "vendor_id_present",
+            "message": "Vendor did not provide a tax/registration ID (GSTIN, VAT, etc.).",
+            "severity": "warning"
+          },
+          {
+            "passed": false,
+            "rule_name": "payment_terms_check",
+            "message": "No payment terms specified on this invoice.",
+            "severity": "info"
+          },
+          {
+            "passed": true,
+            "rule_name": "currency_consistency",
+            "message": "Currency 'USD' is a recognized ISO 4217 code.",
+            "severity": "warning"
+          }
+        ]
+      },
+      "anomalies": {
+        "count": 0,
+        "items": []
+      },
+      "decision": {
+        "outcome": "flag_review",
+        "approval_level": "manager",
+        "risk_score": 0.35,
+        "reasoning": "Moderate risk score (0.35) requires human review by Manager."
+      },
+      "audit_trail_steps": 5
+    }
+  ]
+}

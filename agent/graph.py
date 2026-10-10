@@ -64,7 +64,12 @@ def build_workflow():
     return workflow.compile(checkpointer=checkpointer)
 
 
-def run_docagent(document_text: str, document_path: str = "document.pdf") -> Dict[str, Any]:
+def run_docagent(
+    document_text: str = "",
+    document_path: str = "document.pdf",
+    document_bytes: Optional[bytes] = None,
+    mime_type: Optional[str] = None,
+) -> Dict[str, Any]:
     """
     Convenience wrapper to run an invoice document through the compiled LangGraph workflow.
     """
@@ -72,6 +77,8 @@ def run_docagent(document_text: str, document_path: str = "document.pdf") -> Dic
     initial_state = {
         "document_text": document_text,
         "document_path": document_path,
+        "document_bytes": document_bytes,
+        "mime_type": mime_type or ("application/pdf" if document_path.endswith(".pdf") else None),
         "extracted_data": None,
         "extraction_confidence": 0.0,
         "validation_results": [],

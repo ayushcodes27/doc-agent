@@ -12,14 +12,14 @@
 
 ---
 
-## 🏛️ System Architecture
+## System Architecture
 
 <div align="center">
   <img src="images/architect.png" alt="DocAgent System Architecture" width="850"/>
 </div>
 
 <details>
-<summary><b>🔍 View Interactive Mermaid Architecture Source</b></summary>
+<summary><b>View Interactive Mermaid Architecture Source</b></summary>
 
 ```mermaid
 graph TB
@@ -29,30 +29,30 @@ graph TB
     classDef toolStyle fill:#FDEDEC,stroke:#E74C3C,stroke-width:2px,color:#78281F;
     classDef dataStyle fill:#F4ECF7,stroke:#8E44AD,stroke-width:2px,color:#512E5F;
 
-    subgraph L1["🖥️ PRESENTATION LAYER"]
+    subgraph L1["PRESENTATION LAYER"]
         UI["Streamlit Web UI<br/>(Live Ingestion, Review Queue, Analytics)"]:::clientStyle
         API_CLIENT["External REST Clients / ERP Systems"]:::clientStyle
     end
 
-    subgraph L2["⚡ API GATEWAY & CONTROLLER"]
+    subgraph L2["API GATEWAY & CONTROLLER"]
         FASTAPI["FastAPI Application<br/>(File Parsing, Async Endpoints, Auth & CORS)"]:::gatewayStyle
     end
 
-    subgraph L3["🧠 AGENTIC ORCHESTRATION ENGINE (LangGraph)"]
+    subgraph L3["AGENTIC ORCHESTRATION ENGINE (LangGraph)"]
         GRAPH["StateGraph Workflow Runner<br/>• Self-Correction Extraction Loop<br/>• Deterministic Business Rule Engine (9 Rules)<br/>• Composite Risk Scoring & Threshold Routing<br/>• Human-in-the-Loop Checkpoint Pausing"]:::agentStyle
     end
 
-    subgraph L4["🛠️ AI & INTELLIGENCE SERVICES"]
+    subgraph L4["AI & INTELLIGENCE SERVICES"]
         direction LR
-        LLM_PRIMARY["✨ Gemini Multimodal<br/>(Vision & Structured JSON)"]:::toolStyle
-        LLM_FALLBACK["🔄 GitHub Models / GPT-4o<br/>(Automatic Fallback)"]:::toolStyle
-        ANOMALY_ENGINE["📊 Statistical & Forensic Engine<br/>(Z-Score Outliers, Round Numbers, Structuring)"]:::toolStyle
+        LLM_PRIMARY["Gemini Multimodal<br/>(Vision & Structured JSON)"]:::toolStyle
+        LLM_FALLBACK["GitHub Models / GPT-4o<br/>(Automatic Fallback)"]:::toolStyle
+        ANOMALY_ENGINE["Statistical & Forensic Engine<br/>(Z-Score Outliers, Round Numbers, Structuring)"]:::toolStyle
     end
 
-    subgraph L5["🗄️ PERSISTENCE & CACHE LAYER"]
+    subgraph L5["PERSISTENCE & CACHE LAYER"]
         direction LR
-        DB[("🐘 PostgreSQL / SQLite<br/>(Invoices, Line Items, Audit Logs, Validations)")]:::dataStyle
-        CACHE[("⚡ Redis / In-Memory Cache<br/>(SHA-256 Deduplication Registry)")]:::dataStyle
+        DB[("PostgreSQL / SQLite<br/>(Invoices, Line Items, Audit Logs, Validations)")]:::dataStyle
+        CACHE[("Redis / In-Memory Cache<br/>(SHA-256 Deduplication Registry)")]:::dataStyle
     end
 
     UI -->|Upload Document / Human Approval| FASTAPI
@@ -69,12 +69,12 @@ graph TB
 
 ---
 
-## ⚡ Core Capabilities & Agent Pipeline
+## Core Capabilities & Agent Pipeline
 
 ```
 Raw Invoice (PDF/Image/TXT)
   │
-  ├─► 1. Multi-Modal Extraction Node (Gemini 2.5/3.6 Flash + GitHub Models fallback with auto-retry)
+  ├─► 1. Multi-Modal Extraction Node (Gemini 2.5/3.8 Flash + GitHub Models fallback with auto-retry)
   │
   ├─► 2. Compliance Validation Node (9 Business Rules: Approved Vendors, Tax Math, Spends, Dates)
   │
@@ -94,12 +94,12 @@ Raw Invoice (PDF/Image/TXT)
 
 ---
 
-## 🛡️ Business Validation Engine (9 Compliance Rules)
+## Business Validation Engine (9 Compliance Rules)
 
 | Rule Name | Severity | Description |
 |---|---|---|
 | `max_amount` | `ERROR` | Invoice amount must not exceed departmental budget limit (₹500,000 / $500,000). |
-| `approved_vendor` | `ERROR` | Vendor must be in the approved master vendor registry (24+ verified enterprise vendors). |
+| `approved_vendor` | `ERROR` | Vendor must be in the approved master vendor registry (24+ verified enterprise vendors + real database vendors). |
 | `date_validity` | `ERROR` | Invoice date must be a valid ISO format and not post-dated in the future. |
 | `visual_text_consistency` | `ERROR` | Embedded visual scan amount must match digital line items (tampering alert). |
 | `line_item_math` | `WARNING` | Individual line items (`qty × rate`) must sum to subtotal within ±1% tolerance. |
@@ -110,31 +110,54 @@ Raw Invoice (PDF/Image/TXT)
 
 ---
 
-## 📊 Evaluation & Benchmark Suite
+## Evaluation & Benchmark Suite
 
-DocAgent includes a dedicated benchmarking harness evaluated against a curated dataset of **20 realistic enterprise invoices** across 5 distinct test categories (Clean, Compliance Failures, Anomaly Triggers, Multi-Tier Routing, and Edge Cases):
+### 1. Real-World Enterprise Benchmark (16 Real Invoices vs 500 Federal Awards)
+
+DocAgent has been benchmarked directly on **16 authentic enterprise PDF invoices** (including Amazon Web Services, Flipkart B2B, Azure, QualityHosting, Coolblue, and Microsoft Document Intelligence samples) evaluated against a historical baseline of **500 real U.S. federal contract awards ($146.1B volume across 178 contractors via USASpending.gov)**:
 
 ```bash
-# Run the evaluation benchmark suite
-python eval/run_eval.py --mode offline
+# Run the real-world enterprise benchmark suite
+python eval/run_real_benchmark.py
 ```
 
-### Benchmark Summary Results
-
-| Benchmark Metric | Result | Target | Status |
+| Real-World Benchmark Metric | Result | Target | Status |
 |---|---|---|---|
-| **Rule Compliance Accuracy** | `100.0%` (180/180 checks) | `≥ 95.0%` | ✅ PASSED |
-| **Anomaly Detection Precision** | `1.00` | `≥ 0.90` | ✅ PASSED |
-| **Anomaly Detection Recall** | `1.00` | `≥ 0.90` | ✅ PASSED |
-| **Anomaly Detection F1 Score** | `1.00` | `≥ 0.90` | ✅ PASSED |
-| **Decision Routing Accuracy** | `100.0%` (20/20 invoices) | `≥ 95.0%` | ✅ PASSED |
-| **Approval Level Routing** | `100.0%` (20/20 invoices) | `≥ 95.0%` | ✅ PASSED |
+| **Document Extraction Rate** | `100.0%` (16/16 invoices) | `≥ 90.0%` | PASSED |
+| **Vendor Recognition Accuracy** | `100.0%` (16/16 vendors) | `≥ 90.0%` | PASSED |
+| **Total Amount Accuracy** | `100.0%` (16/16 totals) | `≥ 95.0%` | PASSED |
+| **Invoice Date Accuracy** | `100.0%` (16/16 dates) | `≥ 90.0%` | PASSED |
+| **Line Items Extraction Rate** | `100.0%` (16/16 items) | `≥ 85.0%` | PASSED |
+| **Average Extraction Confidence** | `95.9%` | `≥ 85.0%` | PASSED |
+| **Average Processing Latency** | `11.23s` / document | `≤ 15.0s` | PASSED |
 
-*Full evaluation reports are auto-generated to [`eval/eval_report.md`](eval/eval_report.md) and [`eval/eval_report.json`](eval/eval_report.json).*
+*Full real-world reports: [`eval/real_benchmark_report.md`](eval/real_benchmark_report.md) and [`eval/real_benchmark_report.json`](eval/real_benchmark_report.json).*
 
 ---
 
-## 📸 User Interface & Screenshots
+### 2. Deterministic Compliance & Anomaly Test Suite
+
+DocAgent also includes a rule-verification test harness evaluated against 20 curated test scenarios across 5 distinct compliance categories:
+
+```bash
+# Run offline compliance rule tests
+python eval/run_eval.py --mode offline
+```
+
+| Benchmark Metric | Result | Target | Status |
+|---|---|---|---|
+| **Rule Compliance Accuracy** | `100.0%` (180/180 checks) | `≥ 95.0%` | PASSED |
+| **Anomaly Detection Precision** | `1.00` | `≥ 0.90` | PASSED |
+| **Anomaly Detection Recall** | `1.00` | `≥ 0.90` | PASSED |
+| **Anomaly Detection F1 Score** | `1.00` | `≥ 0.90` | PASSED |
+| **Decision Routing Accuracy** | `100.0%` (20/20 invoices) | `≥ 95.0%` | PASSED |
+| **Approval Level Routing** | `100.0%` (20/20 invoices) | `≥ 95.0%` | PASSED |
+
+*Full offline evaluation reports: [`eval/eval_report.md`](eval/eval_report.md) and [`eval/eval_report.json`](eval/eval_report.json).*
+
+---
+
+## User Interface & Screenshots
 
 ### 1. Document Upload & Processing Dashboard
 Upload PDF, Image, or TXT invoices to initiate multi-stage extraction, compliance verification, and routing.
@@ -153,7 +176,7 @@ Transparent observability into every step executed by the LangGraph state machin
 
 ---
 
-## 🛠️ Technical Decisions & Architecture Rationale
+## Technical Decisions & Architecture Rationale
 
 | Decision Area | Technology / Pattern | Engineering Rationale |
 |---|---|---|
@@ -167,7 +190,7 @@ Transparent observability into every step executed by the LangGraph state machin
 
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 - Python 3.12+
@@ -237,7 +260,7 @@ Transparent observability into every step executed by the LangGraph state machin
 
 ---
 
-## 🧪 Running Unit & Integration Tests
+## Running Unit & Integration Tests
 
 The test suite covers data models, agent nodes, validation rules, anomaly detection, deduplication, database persistence, and the complete LangGraph workflow.
 
@@ -245,22 +268,27 @@ The test suite covers data models, agent nodes, validation rules, anomaly detect
 # Run all 42 unit and integration tests
 pytest -v
 
-# Run evaluation benchmark suite
+# Run real-world benchmark suite
+python eval/run_real_benchmark.py
+
+# Run offline compliance rule tests
 python eval/run_eval.py --mode offline
 ```
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
 ```
 doc-agent/
 ├── agent/       # LangGraph StateGraph workflow, nodes, & human-in-the-loop logic
 ├── api/         # FastAPI REST service (/process, /resume, /invoices, /analytics)
+├── data/        # Real procurement datasets (USASpending.gov) & benchmark invoices
 ├── db/          # SQLAlchemy 2.0 persistence layer, ORM models, & repository CRUD
-├── eval/        # 20-invoice benchmark dataset & evaluation runner (run_eval.py)
+├── eval/        # Benchmark runners, ground truth datasets, and evaluation reports
 ├── tools/       # Multi-modal extractors, 9-rule validator, anomaly & dedup engines
 ├── ui/          # Streamlit frontend (Document ingestion, review queue, analytics)
+├── scripts/     # Ingestion, seeding, and downloading utilities
 ├── tests/       # Pytest unit & integration test suite (42 tests)
 ├── config.py    # Environment configuration & LLM provider settings
 └── docker-compose.yml # Container orchestration (API, UI, PostgreSQL, Redis)
@@ -268,5 +296,5 @@ doc-agent/
 
 ---
 
-## 📄 License
+## License
 Distributed under the MIT License. See `LICENSE` for more information.

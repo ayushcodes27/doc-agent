@@ -101,6 +101,29 @@ def _get_field(data: Union[ExtractedInvoice, Dict[str, Any]], field: str, defaul
     return data.get(field, default)
 
 
+def get_approved_vendors() -> List[str]:
+    """
+    Retrieve combined list of static approved vendors and verified vendors
+    from the database (e.g., real federal contractors and active vendors).
+    """
+    vendors = list(DEFAULT_APPROVED_VENDORS)
+    try:
+        from db.session import get_db_context
+        from db.models import InvoiceRecord
+        from sqlalchemy import select, func
+        with get_db_context() as db:
+            db_vendors = db.scalars(
+                select(func.distinct(InvoiceRecord.vendor_name))
+                .where(InvoiceRecord.vendor_name.isnot(None), InvoiceRecord.status != "rejected")
+            ).all()
+            for v in db_vendors:
+                if v and str(v).strip() and str(v).strip() not in vendors:
+                    vendors.append(str(v).strip())
+    except Exception:
+        pass
+    return vendors
+
+
 def validate_invoice(
     invoice: Union[ExtractedInvoice, Dict[str, Any]],
     rules: Optional[List[Dict[str, Any]]] = None,
@@ -108,7 +131,7 @@ def validate_invoice(
 ) -> List[ValidationResult]:
     """Run compliance rules against an extracted invoice."""
     rules_to_run = rules if rules is not None else DEFAULT_COMPLIANCE_RULES
-    vendor_list = approved_vendors if approved_vendors is not None else DEFAULT_APPROVED_VENDORS
+    vendor_list = approved_vendors if approved_vendors is not None else get_approved_vendors()
     
     results: List[ValidationResult] = []
 
