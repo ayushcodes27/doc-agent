@@ -21,6 +21,8 @@ class AgentState(TypedDict):
     tampering_detected: bool
     tampering_reasons: List[str]
     text_quality_score: float
+    verifier_text: Optional[str]                    # Complete text including RapidOCR fallback for Reader B
+    used_ocr_fallback: bool                         # True if RapidOCR fallback was used on scanned pages
 
     # Extraction & Dual-Reader State
     extraction_retries: int

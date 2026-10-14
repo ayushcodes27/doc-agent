@@ -118,6 +118,8 @@ def run_docagent(
         "tampering_detected": False,
         "tampering_reasons": [],
         "text_quality_score": 1.0,
+        "verifier_text": None,
+        "used_ocr_fallback": False,
         "extracted_data": None,
         "reader_b_data": None,
         "reader_disagreements": [],

@@ -11,8 +11,94 @@ import os
 import re
 import base64
 import hashlib
+import logging
 from typing import Union, Optional, Dict, Any, List, Tuple
 import pymupdf as fitz
+
+logger = logging.getLogger(__name__)
+
+# Global lazy-initialized RapidOCR singleton
+_ocr_engine = None
+
+
+def get_ocr_engine():
+    """Returns singleton instance of RapidOCR, loading model into memory only once."""
+    global _ocr_engine
+    if _ocr_engine is None:
+        try:
+            from rapidocr_onnxruntime import RapidOCR
+            _ocr_engine = RapidOCR()
+        except ImportError:
+            try:
+                from rapidocr import RapidOCR
+                _ocr_engine = RapidOCR()
+            except ImportError:
+                logger.warning("RapidOCR not installed. Scanned page OCR fallback will be disabled.")
+                _ocr_engine = False
+    return _ocr_engine if _ocr_engine is not False else None
+
+
+def run_rapidocr(img_bytes: bytes) -> str:
+    """Run RapidOCR on image bytes and return clean newline-delimited text."""
+    engine = get_ocr_engine()
+    if not engine:
+        return ""
+    try:
+        result = engine(img_bytes)
+        if isinstance(result, tuple):
+            result = result[0]
+        if not result:
+            return ""
+        if hasattr(result, "txts") and result.txts:
+            return "\n".join(result.txts)
+        if isinstance(result, list):
+            lines = [item[1] for item in result if len(item) > 1 and item[1]]
+            return "\n".join(lines)
+    except Exception as e:
+        logger.warning(f"RapidOCR execution failed: {e}")
+    return ""
+
+
+def get_document_text(pdf_bytes: bytes, min_chars_per_page: int = 50) -> Dict[str, Any]:
+    """
+    Extracts text for Reader A and Reader B.
+    Returns both raw digital text (for tampering check) and complete text (for Reader B).
+    Attempts fast digital text extraction first, and automatically triggers
+    RapidOCR on any page that looks like a flat scan.
+    """
+    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+    raw_digital_text = []
+    reader_b_text = []
+    used_ocr = False
+
+    try:
+        for page in doc:
+            # 1. Try extracting the native digital text layer
+            digital_page_text = page.get_text("text").strip()
+            raw_digital_text.append(digital_page_text)
+
+            # 2. If the page has enough digital text, use it directly
+            if len(digital_page_text) >= min_chars_per_page:
+                reader_b_text.append(digital_page_text)
+            else:
+                # 3. OCR FALLBACK: Page is a scan/image! Render at 150 DPI and run RapidOCR
+                pix = page.get_pixmap(dpi=150)
+                img_bytes = pix.tobytes("png")
+                ocr_page_text = run_rapidocr(img_bytes)
+
+                if ocr_page_text.strip():
+                    used_ocr = True
+                    reader_b_text.append(ocr_page_text.strip())
+                elif digital_page_text:
+                    reader_b_text.append(digital_page_text)
+    finally:
+        doc.close()
+
+    return {
+        "digital_layer_text": "\n".join(t for t in raw_digital_text if t).strip(),
+        "verifier_text": "\n".join(t for t in reader_b_text if t).strip(),
+        "used_ocr_fallback": used_ocr,
+    }
 
 
 def compute_file_hash(data: bytes) -> str:
@@ -223,15 +309,29 @@ def prepare_document_source(
             raw_text = ""
         
         b64_img = [base64.b64encode(file_bytes).decode("utf-8")] if not raw_text else []
+        verifier_text = raw_text
+        used_ocr = False
+
+        if not raw_text and b64_img:
+            # Flattened image file (PNG/JPG/etc): run RapidOCR
+            ocr_text = run_rapidocr(file_bytes)
+            if ocr_text.strip():
+                verifier_text = ocr_text.strip()
+                used_ocr = True
+
+        effective_text = verifier_text if verifier_text else raw_text
         return {
             "raw_text": raw_text,
+            "digital_layer_text": raw_text,
+            "verifier_text": verifier_text,
+            "used_ocr_fallback": used_ocr,
             "pages_count": 1,
             "page_images_base64": b64_img,
             "file_bytes": file_bytes,
             "file_hash": file_hash,
             "tampering_detected": False,
             "tampering_reasons": [],
-            "text_quality_score": compute_text_quality_score(raw_text, 1),
+            "text_quality_score": compute_text_quality_score(effective_text, 1),
             "is_digital_pdf": False,
             "is_scanned": bool(b64_img),
         }
@@ -240,38 +340,39 @@ def prepare_document_source(
     doc = fitz.open(stream=file_bytes, filetype="pdf")
     pages_count = len(doc)
     
-    # 1. Extract digital text layer
-    text_blocks = []
-    has_images = False
-    for page in doc:
-        t = page.get_text("text").strip()
-        if t:
-            text_blocks.append(t)
-        if len(page.get_images()) > 0:
-            has_images = True
-            
-    raw_text = "\n\n".join(text_blocks)
-    
-    # 2. Inspect concrete tampering & visual mismatches
+    # 1. Inspect concrete tampering & visual mismatches on native digital layer
     tampering_detected, tampering_reasons = check_document_tampering(doc)
 
-    # 3. Render page images for vision models
+    # 2. Render page images for vision models
     page_images = []
+    has_images = False
     for page_num in range(min(pages_count, max_pages)):
         page = doc[page_num]
         pix = page.get_pixmap(dpi=150)
         page_images.append(base64.b64encode(pix.tobytes("png")).decode("utf-8"))
+        if len(page.get_images()) > 0:
+            has_images = True
 
     doc.close()
 
-    # Determine if primarily scanned or digital
-    is_scanned = (len(raw_text.split()) < 30) and has_images
-    is_digital_pdf = len(raw_text.split()) >= 30
+    # 3. Hybrid text extraction (digital layer first, RapidOCR on flat scanned pages)
+    extracted_text_data = get_document_text(file_bytes)
+    digital_text = extracted_text_data["digital_layer_text"]
+    verifier_text = extracted_text_data["verifier_text"]
+    used_ocr = extracted_text_data["used_ocr_fallback"]
 
-    text_quality = compute_text_quality_score(raw_text, pages_count)
+    # Determine if primarily scanned or digital
+    is_scanned = (len(digital_text.split()) < 30) and (has_images or used_ocr)
+    is_digital_pdf = len(digital_text.split()) >= 30
+
+    effective_text = verifier_text if verifier_text else digital_text
+    text_quality = compute_text_quality_score(effective_text, pages_count)
 
     return {
-        "raw_text": raw_text,
+        "raw_text": digital_text,
+        "digital_layer_text": digital_text,
+        "verifier_text": verifier_text,
+        "used_ocr_fallback": used_ocr,
         "pages_count": pages_count,
         "page_images_base64": page_images,
         "file_bytes": file_bytes,
@@ -285,6 +386,6 @@ def prepare_document_source(
 
 
 def load_document(source: Union[str, bytes], filename: Optional[str] = None) -> str:
-    """Convenience backwards-compatible loader returning raw text."""
+    """Convenience backwards-compatible loader returning document text (with OCR fallback for scans)."""
     prep = prepare_document_source(source, filename)
-    return prep["raw_text"]
+    return prep.get("verifier_text") or prep.get("raw_text", "")

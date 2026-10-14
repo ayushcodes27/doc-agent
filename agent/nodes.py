@@ -72,7 +72,7 @@ def check_file_hash_node(state: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def prepare_source_node(state: Dict[str, Any]) -> Dict[str, Any]:
-    """Node: Text Source Prep & Concrete Tampering Inspection."""
+    """Node: Text Source Prep, Concrete Tampering Inspection, and RapidOCR Fallback."""
     audit_trail = list(state.get("audit_trail", []))
     doc_bytes = state.get("document_bytes")
     doc_text = state.get("document_text", "")
@@ -85,15 +85,22 @@ def prepare_source_node(state: Dict[str, Any]) -> Dict[str, Any]:
     tampering_reasons = prep.get("tampering_reasons", [])
     quality_score = prep.get("text_quality_score", 1.0)
     raw_text = prep.get("raw_text", doc_text)
+    digital_layer_text = prep.get("digital_layer_text", raw_text)
+    verifier_text = prep.get("verifier_text", raw_text)
+    used_ocr = prep.get("used_ocr_fallback", False)
 
     if tampering_detected:
         reasons_summary = "; ".join(tampering_reasons[:2])
         _log_audit(audit_trail, "tampering_check", f"TAMPERING DETECTED: {reasons_summary}")
+    elif used_ocr:
+        _log_audit(audit_trail, "tampering_check", f"Clean: Flat scan detected. RapidOCR local fallback extracted text for Reader B (Quality: {quality_score:.2f}).")
     else:
         _log_audit(audit_trail, "tampering_check", f"Clean: No hidden/microscopic text layers detected (Quality Score: {quality_score:.2f}).")
 
     return {
-        "document_text": raw_text,
+        "document_text": digital_layer_text,
+        "verifier_text": verifier_text,
+        "used_ocr_fallback": used_ocr,
         "file_hash": prep.get("file_hash", state.get("file_hash")),
         "tampering_detected": tampering_detected,
         "tampering_reasons": tampering_reasons,
@@ -169,7 +176,7 @@ def handle_extraction_failed(state: Dict[str, Any]) -> Dict[str, Any]:
 def verify_reader_b_node(state: Dict[str, Any]) -> Dict[str, Any]:
     """Node: Verifier Reader B (Text-only GitHub Models / GPT-4o-mini)."""
     audit_trail = list(state.get("audit_trail", []))
-    doc_text = state.get("document_text", "")
+    verifier_text = state.get("verifier_text") or state.get("document_text", "")
     extracted_a = state.get("extracted_data") or {}
 
     # Check for unit test mock environment
@@ -182,9 +189,9 @@ def verify_reader_b_node(state: Dict[str, Any]) -> Dict[str, Any]:
         }
 
     reader_b_result = None
-    if doc_text and doc_text.strip():
+    if verifier_text and verifier_text.strip():
         try:
-            reader_b_result = extract_with_verifier(doc_text)
+            reader_b_result = extract_with_verifier(verifier_text)
         except Exception as e:
             logger.warning(f"Reader B execution skipped or failed: {e}")
 
@@ -208,7 +215,7 @@ def compare_and_verify_node(state: Dict[str, Any]) -> Dict[str, Any]:
     audit_trail = list(state.get("audit_trail", []))
     extracted_a = state.get("extracted_data") or {}
     reader_b = state.get("reader_b_data")
-    doc_text = state.get("document_text", "")
+    verifier_text = state.get("verifier_text") or state.get("document_text", "")
 
     # In unit tests with mock extractor and high confidence
     is_mock = isinstance(extract_invoice_data, MagicMock) or getattr(extract_invoice_data, "_mock_return_value", None) is not None
@@ -220,7 +227,7 @@ def compare_and_verify_node(state: Dict[str, Any]) -> Dict[str, Any]:
             "audit_trail": audit_trail,
         }
 
-    verification = compare_and_verify(extracted_a, reader_b, raw_text=doc_text)
+    verification = compare_and_verify(extracted_a, reader_b, raw_text=verifier_text)
     level = verification.get("verification_level", "none")
     disagreements = verification.get("discrepancies", [])
     detail_msg = f"Verification Level: {level.upper()} | {verification.get('details', '')}"
