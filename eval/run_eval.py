@@ -66,70 +66,20 @@ def calculate_risk_and_decision(
     anomalies: List[Dict[str, Any]],
     is_duplicate: bool,
     confidence: float = 1.0,
+    verification_level: str = "full",
 ) -> Tuple[float, str, str, str]:
     """Compute risk score and routing decision matching agent/nodes.py logic."""
-    score = 0.0
+    from tools.risk_calculator import calculate_composite_risk
 
-    if is_duplicate:
-        score = 1.0
-    else:
-        # Failed validations impact
-        for val in validation_results:
-            if not val.get("passed", True):
-                sev = val.get("severity", "error")
-                if sev == "error":
-                    score += 0.25
-                elif sev == "warning":
-                    score += 0.10
-
-        # Anomalies impact
-        if anomalies:
-            max_anomaly = max((float(a.get("score", 0.3)) for a in anomalies), default=0.0)
-            score += max_anomaly
-
-        # Extraction confidence penalty
-        if confidence < 0.70:
-            score += 0.30
-
-    risk_score = min(max(round(score, 2), 0.0), 1.0)
-
-    total_amount = float(extracted_data.get("total_amount", 0.0) or 0.0)
-    visual_tampering = any(a.get("type") == "visual_text_mismatch" for a in anomalies)
-
-    if not extracted_data:
-        decision = "reject"
-        level = "auto"
-        reason = "Rejection: No data was extracted from the document."
-    elif is_duplicate:
-        decision = "reject"
-        level = "auto"
-        reason = "Duplicate invoice detected with matching vendor, invoice number, and total amount."
-    elif visual_tampering:
-        decision = "reject"
-        level = "auto"
-        reason = "Rejection: Critical document tampering alert — embedded scanned copy amount conflicts with digital line items."
-    elif risk_score >= 0.70:
-        decision = "reject"
-        level = "auto"
-        reason = f"High risk score ({risk_score:.2f}) exceeds rejection threshold (0.70)."
-    elif risk_score >= 0.25:
-        level = "director" if (total_amount > 200000.0 or risk_score >= 0.60) else "manager"
-        decision = "flag_review"
-        reason = f"Moderate risk score ({risk_score:.2f}) requires human review by {level.title()}."
-    elif total_amount > 200000.0:
-        decision = "flag_review"
-        level = "director"
-        reason = f"Invoice total amount ({total_amount:,.2f}) exceeds director review threshold (200,000)."
-    elif total_amount > 100000.0:
-        decision = "flag_review"
-        level = "manager"
-        reason = f"Invoice total amount ({total_amount:,.2f}) exceeds manager auto-approve threshold (100,000)."
-    else:
-        decision = "auto_approve"
-        level = "auto"
-        reason = f"Low risk score ({risk_score:.2f}) and total amount within limits."
-
-    return risk_score, decision, level, reason
+    res = calculate_composite_risk(
+        extraction_data=extracted_data,
+        verification_level=verification_level,
+        validation_results=validation_results,
+        anomalies=anomalies,
+        is_duplicate=is_duplicate,
+        confidence=confidence,
+    )
+    return res["risk_score"], res["decision"], res["approval_level"], res["reason"]
 
 
 def evaluate_field_match(actual: Any, expected: Any, field_name: str) -> Tuple[bool, str]:

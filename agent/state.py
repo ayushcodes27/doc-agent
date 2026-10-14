@@ -41,6 +41,7 @@ class AgentState(TypedDict):
 
     # Decision Engine Outputs
     risk_score: float                               # 0.0 to 1.0 aggregate risk score
+    risk_breakdown: Optional[Dict[str, float]]      # 3-pillar breakdown (verification, compliance, behavioral)
     decision: str                                   # "auto_approve" | "flag_review" | "reject"
     decision_reasoning: str                         # Detailed reasoning explanation
     approval_level: str                             # "auto" | "manager" | "director"

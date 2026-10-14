@@ -130,6 +130,7 @@ def run_docagent(
         "is_duplicate": False,
         "is_near_duplicate": False,
         "risk_score": 0.0,
+        "risk_breakdown": None,
         "decision": "pending",
         "decision_reasoning": "",
         "approval_level": "auto",

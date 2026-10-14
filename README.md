@@ -92,10 +92,14 @@ Raw Invoice (PDF/Image/TXT)
   │
   ├─► 9. 3-Tier Vendor Anomaly Detection (Tier 0 Cold-Start, Tier 1 Small-Sample, Tier 2 Empirical Z-Scores)
   │
-  ├─► 10. Risk Scoring & Decision Routing Node (Calibrated composite risk score; enforces Auto-Approve Invariant)
-  │     ├── Risk < 0.20 & Verification == 'FULL' ──► Auto-Approve
-  │     ├── Risk ≥ 0.70 or Tampering/Duplicates  ──► Auto-Reject
-  │     └── Risk ≥ 0.20 or Partial Verification  ──► Flag for Human Review (Manager / Director)
+  ├─► 10. Bounded 3-Pillar Risk Scoring & Decision Routing Node
+  │     ├── Hard Gates (Duplicates, Tampering, Verification NONE) ──► Auto-Reject (Score: 1.00)
+  │     ├── Pillar 1: Data Trust & Verification Risk (Max Ceiling: 0.25)
+  │     ├── Pillar 2: Policy & Compliance Risk + 0.15 Saturation Cap (Max Ceiling: 0.35)
+  │     ├── Pillar 3: Behavioral & Spend Anomaly Risk (Max Ceiling: 0.40)
+  │     ├── Composite Risk < 0.25 & Verification == 'FULL' & Total <= $100k ──► Auto-Approve
+  │     ├── Composite Risk ≥ 0.70 ──► Auto-Reject
+  │     └── In-between (Risk ≥ 0.25 or High Amount or Partial Verification) ──► Flag for Human Review
   │
   ├─► 11. Human Review Queue & Correction Loop (Max 2 re-entries limit, separation of duties, case reopening)
   │
