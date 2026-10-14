@@ -7,17 +7,9 @@ from api.models import ExtractedInvoice
 
 logger = logging.getLogger(__name__)
 
-# Try importing redis
-try:
-    import redis
-    REDIS_AVAILABLE = True
-except ImportError:
-    redis = None
-    REDIS_AVAILABLE = False
-
 
 class InMemoryDuplicateCache:
-    """In-memory cache fallback when Redis is unavailable."""
+    """In-memory cache for fast deduplication lookup."""
 
     def __init__(self):
         self._cache: Dict[str, Dict[str, Any]] = {}
@@ -41,32 +33,6 @@ class InMemoryDuplicateCache:
 
 
 _in_memory_cache = InMemoryDuplicateCache()
-_redis_client = None
-_last_redis_check = 0.0
-_REDIS_RETRY_INTERVAL = 30.0  # seconds cooldown before retrying Redis connection
-
-
-def get_redis_client():
-    """Get Redis client instance or return None if unavailable (with retry cooldown)."""
-    global _redis_client, _last_redis_check
-    if not REDIS_AVAILABLE:
-        return None
-    if _redis_client is not None:
-        return _redis_client
-    
-    now = time.time()
-    if now - _last_redis_check < _REDIS_RETRY_INTERVAL:
-        return None
-        
-    _last_redis_check = now
-    try:
-        client = redis.from_url(settings.REDIS_URL, socket_connect_timeout=0.5)
-        client.ping()
-        _redis_client = client
-    except Exception as e:
-        logger.warning(f"Redis unavailable, falling back to in-memory duplicate cache: {e}")
-        _redis_client = None
-    return _redis_client
 
 
 def _get_field(data: Union[ExtractedInvoice, Dict[str, Any]], field: str, default: Any = None) -> Any:
@@ -87,54 +53,64 @@ def generate_fingerprint(invoice: Union[ExtractedInvoice, Dict[str, Any]]) -> st
 
 def check_duplicate(
     invoice: Union[ExtractedInvoice, Dict[str, Any]],
+    db: Optional[Any] = None,
+    exclude_case_id: Optional[str] = None,
     record_if_new: bool = True,
     ttl_seconds: int = 90 * 86400,
 ) -> Dict[str, Any]:
     """
-    Check if an invoice with identical vendor, invoice number, and total amount
-    has already been processed. Returns a dict with duplicate status and fingerprint.
+    Check if an invoice with identical vendor and invoice number has already been processed.
+    Queries the PostgreSQL/SQLite database directly (taking ~2ms) with in-memory caching.
     """
     fingerprint = generate_fingerprint(invoice)
     cache_key = f"docagent:invoice:{fingerprint}"
     invoice_id = str(_get_field(invoice, "invoice_number", "unknown"))
+    vendor_name = str(_get_field(invoice, "vendor_name", "") or "").strip().lower()
+    inv_num = str(_get_field(invoice, "invoice_number", "") or "").strip().upper()
 
-    r = get_redis_client()
-
-    if r is not None:
+    # 1. Fast SQL query in PostgreSQL / SQLite
+    if vendor_name and inv_num:
         try:
-            if record_if_new:
-                was_new = r.set(cache_key, invoice_id, nx=True, ex=ttl_seconds)
-                if not was_new:
-                    existing = r.get(cache_key)
-                    return {
-                        "is_duplicate": True,
-                        "original_id": existing.decode("utf-8") if isinstance(existing, bytes) and existing else str(existing) if existing else "unknown",
-                        "fingerprint": fingerprint,
-                        "storage": "redis",
-                    }
-                return {
-                    "is_duplicate": False,
-                    "fingerprint": fingerprint,
-                    "storage": "redis",
-                }
+            from db.session import get_db_context
+            from db.models import InvoiceRecord
+            from sqlalchemy import select, func
+
+            def _query_db(session):
+                stmt = (
+                    select(InvoiceRecord)
+                    .where(
+                        func.lower(InvoiceRecord.vendor_name) == vendor_name,
+                        func.upper(InvoiceRecord.invoice_number) == inv_num,
+                        InvoiceRecord.status != "rejected"
+                    )
+                    .order_by(InvoiceRecord.created_at.desc())
+                )
+                if exclude_case_id:
+                    stmt = stmt.where(InvoiceRecord.id != exclude_case_id)
+                return session.scalars(stmt).first()
+
+            prior = None
+            if db is not None:
+                prior = _query_db(db)
             else:
-                existing = r.get(cache_key)
-                if existing:
-                    return {
-                        "is_duplicate": True,
-                        "original_id": existing.decode("utf-8") if isinstance(existing, bytes) else str(existing),
-                        "fingerprint": fingerprint,
-                        "storage": "redis",
-                    }
+                try:
+                    with get_db_context() as session:
+                        prior = _query_db(session)
+                except Exception:
+                    prior = None
+
+            if prior:
                 return {
-                    "is_duplicate": False,
+                    "is_duplicate": True,
+                    "original_id": prior.invoice_number or prior.id,
+                    "prior_case_id": prior.id,
                     "fingerprint": fingerprint,
-                    "storage": "redis",
+                    "storage": "database",
                 }
         except Exception as e:
-            logger.warning(f"Redis error during duplicate check, falling back: {e}")
+            logger.debug(f"Database duplicate check skipped: {e}")
 
-    # In-memory fallback
+    # 2. In-memory cache check (for in-process or mock test environments)
     existing_mem = _in_memory_cache.get(cache_key)
     if existing_mem:
         return {
@@ -297,18 +273,9 @@ def register_invoice_fingerprint(
     invoice: Union[ExtractedInvoice, Dict[str, Any]],
     ttl_seconds: int = 90 * 86400,
 ) -> str:
-    """Manually register an invoice fingerprint in cache."""
+    """Register an invoice fingerprint into in-memory cache."""
     fingerprint = generate_fingerprint(invoice)
     cache_key = f"docagent:invoice:{fingerprint}"
     invoice_id = str(_get_field(invoice, "invoice_number", "unknown"))
-
-    r = get_redis_client()
-    if r is not None:
-        try:
-            r.setex(cache_key, ttl_seconds, invoice_id)
-            return fingerprint
-        except Exception as e:
-            logger.warning(f"Redis error during register, falling back: {e}")
-
     _in_memory_cache.setex(cache_key, ttl_seconds, invoice_id)
     return fingerprint

@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-09-25T16:59:56.055380+00:00",
+  "timestamp": "2026-10-14T20:24:55.545005+00:00",
   "mode": "offline",
   "metrics": {
     "total_invoices": 20,
@@ -155,7 +155,7 @@
         "expected_level": "auto",
         "actual_level": "auto",
         "risk_score": 0.0,
-        "reasoning": "Low risk score (0.00) and total amount within limits."
+        "reasoning": "Low risk score (0.00), full verification confirmed, and total amount within limits."
       }
     },
     {
@@ -231,7 +231,7 @@
         "expected_level": "auto",
         "actual_level": "auto",
         "risk_score": 0.0,
-        "reasoning": "Low risk score (0.00) and total amount within limits."
+        "reasoning": "Low risk score (0.00), full verification confirmed, and total amount within limits."
       }
     },
     {
@@ -307,7 +307,7 @@
         "expected_level": "auto",
         "actual_level": "auto",
         "risk_score": 0.0,
-        "reasoning": "Low risk score (0.00) and total amount within limits."
+        "reasoning": "Low risk score (0.00), full verification confirmed, and total amount within limits."
       }
     },
     {
@@ -383,7 +383,7 @@
         "expected_level": "auto",
         "actual_level": "auto",
         "risk_score": 0.0,
-        "reasoning": "Low risk score (0.00) and total amount within limits."
+        "reasoning": "Low risk score (0.00), full verification confirmed, and total amount within limits."
       }
     },
     {
@@ -459,7 +459,7 @@
         "expected_level": "manager",
         "actual_level": "manager",
         "risk_score": 0.25,
-        "reasoning": "Moderate risk score (0.25) requires human review by Manager."
+        "reasoning": "Moderate risk score (0.25) or total amount ($22,000.00) exceeds auto-approve threshold."
       }
     },
     {
@@ -535,7 +535,7 @@
         "expected_level": "director",
         "actual_level": "director",
         "risk_score": 0.25,
-        "reasoning": "Moderate risk score (0.25) requires human review by Director."
+        "reasoning": "Elevated risk score (0.25) or high total amount ($649,000.00) requires Director review."
       }
     },
     {
@@ -611,7 +611,7 @@
         "expected_level": "director",
         "actual_level": "director",
         "risk_score": 0.25,
-        "reasoning": "Moderate risk score (0.25) requires human review by Director."
+        "reasoning": "Elevated risk score (0.25) or high total amount ($259,600.00) requires Director review."
       }
     },
     {
@@ -686,8 +686,8 @@
         "level_matched": true,
         "expected_level": "auto",
         "actual_level": "auto",
-        "risk_score": 0.1,
-        "reasoning": "Low risk score (0.10) and total amount within limits."
+        "risk_score": 0.05,
+        "reasoning": "Low risk score (0.05), full verification confirmed, and total amount within limits."
       }
     },
     {
@@ -762,8 +762,8 @@
         "level_matched": true,
         "expected_level": "auto",
         "actual_level": "auto",
-        "risk_score": 0.1,
-        "reasoning": "Low risk score (0.10) and total amount within limits."
+        "risk_score": 0.05,
+        "reasoning": "Low risk score (0.05), full verification confirmed, and total amount within limits."
       }
     },
     {
@@ -849,8 +849,8 @@
         "level_matched": true,
         "expected_level": "manager",
         "actual_level": "manager",
-        "risk_score": 0.3,
-        "reasoning": "Moderate risk score (0.30) requires human review by Manager."
+        "risk_score": 0.25,
+        "reasoning": "Moderate risk score (0.25) or total amount ($50,000.00) exceeds auto-approve threshold."
       }
     },
     {
@@ -936,8 +936,8 @@
         "level_matched": true,
         "expected_level": "manager",
         "actual_level": "manager",
-        "risk_score": 0.4,
-        "reasoning": "Moderate risk score (0.40) requires human review by Manager."
+        "risk_score": 0.25,
+        "reasoning": "Moderate risk score (0.25) or total amount ($28,000.00) exceeds auto-approve threshold."
       }
     },
     {
@@ -1023,8 +1023,8 @@
         "level_matched": true,
         "expected_level": "manager",
         "actual_level": "manager",
-        "risk_score": 0.5,
-        "reasoning": "Moderate risk score (0.50) requires human review by Manager."
+        "risk_score": 0.25,
+        "reasoning": "Moderate risk score (0.25) or total amount ($99,500.00) exceeds auto-approve threshold."
       }
     },
     {
@@ -1110,8 +1110,8 @@
         "level_matched": true,
         "expected_level": "manager",
         "actual_level": "manager",
-        "risk_score": 0.5,
-        "reasoning": "Moderate risk score (0.50) requires human review by Manager."
+        "risk_score": 0.25,
+        "reasoning": "Moderate risk score (0.25) or total amount ($198,000.00) exceeds auto-approve threshold."
       }
     },
     {
@@ -1205,8 +1205,8 @@
         "level_matched": true,
         "expected_level": "manager",
         "actual_level": "manager",
-        "risk_score": 0.5,
-        "reasoning": "Moderate risk score (0.50) requires human review by Manager."
+        "risk_score": 0.25,
+        "reasoning": "Moderate risk score (0.25) or total amount ($100,000.00) exceeds auto-approve threshold."
       }
     },
     {
@@ -1282,7 +1282,7 @@
         "expected_level": "manager",
         "actual_level": "manager",
         "risk_score": 0.0,
-        "reasoning": "Invoice total amount (125,000.00) exceeds manager auto-approve threshold (100,000)."
+        "reasoning": "Moderate risk score (0.00) or total amount ($125,000.00) exceeds auto-approve threshold."
       }
     },
     {
@@ -1358,7 +1358,7 @@
         "expected_level": "director",
         "actual_level": "director",
         "risk_score": 0.0,
-        "reasoning": "Invoice total amount (295,000.00) exceeds director review threshold (200,000)."
+        "reasoning": "Elevated risk score (0.00) or high total amount ($295,000.00) requires Director review."
       }
     },
     {
@@ -1433,8 +1433,8 @@
         "level_matched": true,
         "expected_level": "auto",
         "actual_level": "auto",
-        "risk_score": 0.85,
-        "reasoning": "High risk score (0.85) exceeds rejection threshold (0.70)."
+        "risk_score": 1.0,
+        "reasoning": "Rejection: Multiple critical compliance policy violations (3 errors)."
       }
     },
     {
@@ -1510,7 +1510,7 @@
         "expected_level": "auto",
         "actual_level": "auto",
         "risk_score": 0.0,
-        "reasoning": "Low risk score (0.00) and total amount within limits."
+        "reasoning": "Low risk score (0.00), full verification confirmed, and total amount within limits."
       }
     },
     {
@@ -1586,7 +1586,7 @@
         "expected_level": "auto",
         "actual_level": "auto",
         "risk_score": 0.0,
-        "reasoning": "Low risk score (0.00) and total amount within limits."
+        "reasoning": "Low risk score (0.00), full verification confirmed, and total amount within limits."
       }
     },
     {

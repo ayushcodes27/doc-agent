@@ -13,9 +13,8 @@ class Settings(BaseSettings):
     GITHUB_ENDPOINT: str = "https://models.inference.ai.azure.com"
     GROQ_API_KEY: str = ""
     
-    # Database & Cache
+    # Database
     DATABASE_URL: str = "postgresql://docagent:docagent@localhost:5432/docagent"
-    REDIS_URL: str = "redis://localhost:6379/0"
     
     # App Settings
     APP_ENV: str = "development"

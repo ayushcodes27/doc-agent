@@ -49,10 +49,10 @@ graph TB
         ANOMALY_ENGINE["Statistical & Forensic Engine<br/>(Z-Score Outliers, Round Numbers, Structuring)"]:::toolStyle
     end
 
-    subgraph L5["PERSISTENCE & CACHE LAYER"]
+    subgraph L5["PERSISTENCE LAYER"]
         direction LR
         DB[("PostgreSQL / SQLite<br/>(Invoices, Line Items, Audit Logs, Validations)")]:::dataStyle
-        CACHE[("Redis / In-Memory Cache<br/>(SHA-256 Deduplication Registry)")]:::dataStyle
+        CACHE[("In-Memory Deduplication Cache<br/>(SHA-256 Fingerprint Registry)")]:::dataStyle
     end
 
     UI -->|Upload Document / Human Approval| FASTAPI
@@ -196,8 +196,7 @@ Transparent observability into every step executed by the LangGraph state machin
 |---|---|---|
 | **Agent Framework** | LangGraph (StateGraph) | Deterministic state machine, checkpointing/resume capabilities, conditional routing, and granular step observability. |
 | **Multi-Modal LLMs** | Google Gemini + GitHub Models (GPT-4o) | High-speed multi-modal vision with automatic failover for high availability and zero vendor lock-in. |
-| **Persistence Layer** | SQLAlchemy 2.0 ORM | Enterprise relational data layer with auto-fallback to SQLite when PostgreSQL is offline for zero-friction local development. |
-| **Duplicate Prevention** | Redis + SHA-256 Fingerprinting | O(1) idempotent hash lookup over key invoice attributes (`vendor:number:total`) with configurable TTL. |
+| **Duplicate Prevention** | SQL Indexing + SHA-256 Fingerprint | Sub-2ms idempotent query over key invoice attributes (`vendor:number`) in PostgreSQL/SQLite + in-memory cache without external broker dependencies. |
 | **Human-in-the-Loop** | LangGraph Interrupts | Pauses workflow execution for manager/director sign-off without dropping state; resumes via `/resume/{thread_id}`. |
 | **Backend API** | FastAPI | Async I/O, automatic OpenAPI Swagger documentation, dependency injection, and Pydantic validation. |
 | **Frontend UI** | Streamlit | Rapid, reactive UI rendering with interactive audit logs, pending review queues, and live analytics. |
@@ -236,7 +235,6 @@ Transparent observability into every step executed by the LangGraph state machin
    - **Streamlit UI:** [http://localhost:8501](http://localhost:8501)
    - **FastAPI Docs (Swagger):** [http://localhost:8000/docs](http://localhost:8000/docs)
    - **PostgreSQL:** `localhost:5432`
-   - **Redis:** `localhost:6379`
 
 ---
 
@@ -303,9 +301,9 @@ doc-agent/
 ├── tools/       # Multi-modal extractors, 9-rule validator, anomaly & dedup engines
 ├── ui/          # Streamlit frontend (Document ingestion, review queue, analytics)
 ├── scripts/     # Ingestion, seeding, and downloading utilities
-├── tests/       # Pytest unit & integration test suite (53 tests)
+├── tests/       # Pytest unit & integration test suite (63 tests)
 ├── config.py    # Environment configuration & LLM provider settings
-└── docker-compose.yml # Container orchestration (API, UI, PostgreSQL, Redis)
+└── docker-compose.yml # Container orchestration (API, UI, PostgreSQL)
 ```
 
 ---

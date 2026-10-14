@@ -320,7 +320,7 @@ def check_duplicates(state: Dict[str, Any]) -> Dict[str, Any]:
         }
 
     exclude_id = state.get("supersedes_id")
-    dup_res = check_duplicate(extracted_data, record_if_new=True)
+    dup_res = check_duplicate(extracted_data, exclude_case_id=exclude_id, record_if_new=True)
     is_dup = bool(dup_res.get("is_duplicate", False))
     original_id = dup_res.get("original_id")
 

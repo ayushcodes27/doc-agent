@@ -20,10 +20,9 @@ fastapi>=0.111.0
 uvicorn>=0.30.0
 python-multipart>=0.0.9
 
-# Storage & Caching
+# Storage & Database
 sqlalchemy>=2.0.0
 psycopg2-binary>=2.9.9
-redis>=5.0.0
 
 # Dashboard UI
 streamlit>=1.35.0
