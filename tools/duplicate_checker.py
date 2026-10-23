@@ -51,6 +51,63 @@ def generate_fingerprint(invoice: Union[ExtractedInvoice, Dict[str, Any]]) -> st
     return hashlib.sha256(raw_key.encode("utf-8")).hexdigest()
 
 
+import re
+
+def normalize_invoice_number(val: Optional[str]) -> str:
+    """Uppercase, alphanumeric-only invoice number (e.g., INV-2024-99 -> INV202499)."""
+    return re.sub(r"[^A-Za-z0-9]", "", val or "").upper()
+
+
+def check_sql_semantic_duplicate(
+    invoice_number: str,
+    vendor_name: str,
+    db: Optional[Any] = None,
+    exclude_case_id: Optional[str] = None,
+) -> bool:
+    """
+    Pillar 2 Semantic Dedup SQL Query:
+    SELECT id FROM invoices WHERE invoice_number_norm = :inv_norm AND vendor_name ILIKE :vendor AND status != 'REJECTED'
+    """
+    inv_norm = normalize_invoice_number(invoice_number)
+    vendor = (vendor_name or "").strip()
+    if not inv_norm or not vendor:
+        return False
+
+    try:
+        from db.session import get_db_context
+        from db.models import InvoiceRecord
+        from sqlalchemy import select, func, or_
+
+        def _query(session):
+            stmt = select(InvoiceRecord.id).where(
+                or_(
+                    InvoiceRecord.invoice_number_norm == inv_norm,
+                    func.upper(InvoiceRecord.invoice_number) == inv_norm,
+                ),
+                func.lower(InvoiceRecord.vendor_name) == vendor.lower(),
+                func.upper(InvoiceRecord.status) != "REJECTED",
+                func.upper(InvoiceRecord.decision) != "REJECT",
+            )
+            if exclude_case_id:
+                stmt = stmt.where(InvoiceRecord.id != exclude_case_id)
+            return session.scalars(stmt).first()
+
+        res = None
+        if db is not None:
+            res = _query(db)
+        else:
+            try:
+                with get_db_context() as session:
+                    res = _query(session)
+            except Exception:
+                res = None
+
+        return res is not None
+    except Exception as e:
+        logger.debug(f"check_sql_semantic_duplicate error: {e}")
+        return False
+
+
 def check_duplicate(
     invoice: Union[ExtractedInvoice, Dict[str, Any]],
     db: Optional[Any] = None,
@@ -60,28 +117,33 @@ def check_duplicate(
 ) -> Dict[str, Any]:
     """
     Check if an invoice with identical vendor and invoice number has already been processed.
-    Queries the PostgreSQL/SQLite database directly (taking ~2ms) with in-memory caching.
+    Queries the database directly using normalized invoice number and vendor name.
     """
     fingerprint = generate_fingerprint(invoice)
     cache_key = f"docagent:invoice:{fingerprint}"
     invoice_id = str(_get_field(invoice, "invoice_number", "unknown"))
-    vendor_name = str(_get_field(invoice, "vendor_name", "") or "").strip().lower()
-    inv_num = str(_get_field(invoice, "invoice_number", "") or "").strip().upper()
+    vendor_name = str(_get_field(invoice, "vendor_name", "") or "").strip()
+    inv_num = str(_get_field(invoice, "invoice_number", "") or "").strip()
+    inv_norm = normalize_invoice_number(inv_num)
 
-    # 1. Fast SQL query in PostgreSQL / SQLite
-    if vendor_name and inv_num:
+    # 1. Pure SQL Semantic Deduplication Query
+    if vendor_name and inv_norm:
         try:
             from db.session import get_db_context
             from db.models import InvoiceRecord
-            from sqlalchemy import select, func
+            from sqlalchemy import select, func, or_
 
             def _query_db(session):
                 stmt = (
                     select(InvoiceRecord)
                     .where(
-                        func.lower(InvoiceRecord.vendor_name) == vendor_name,
-                        func.upper(InvoiceRecord.invoice_number) == inv_num,
-                        InvoiceRecord.status != "rejected"
+                        or_(
+                            InvoiceRecord.invoice_number_norm == inv_norm,
+                            func.upper(InvoiceRecord.invoice_number) == inv_num.upper(),
+                        ),
+                        func.lower(InvoiceRecord.vendor_name) == vendor_name.lower(),
+                        func.upper(InvoiceRecord.status) != "REJECTED",
+                        func.upper(InvoiceRecord.decision) != "REJECT",
                     )
                     .order_by(InvoiceRecord.created_at.desc())
                 )
@@ -110,7 +172,7 @@ def check_duplicate(
         except Exception as e:
             logger.debug(f"Database duplicate check skipped: {e}")
 
-    # 2. In-memory cache check (for in-process or mock test environments)
+    # 2. In-memory cache check (for unit test mock environments)
     existing_mem = _in_memory_cache.get(cache_key)
     if existing_mem:
         return {

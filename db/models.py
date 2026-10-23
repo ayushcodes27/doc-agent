@@ -60,6 +60,7 @@ class InvoiceRecord(Base):
     # Deduplication & Verification Lineage
     is_duplicate: Mapped[bool] = mapped_column(Boolean, default=False, index=True)
     file_hash: Mapped[Optional[str]] = mapped_column(String(64), index=True, nullable=True)
+    invoice_number_norm: Mapped[Optional[str]] = mapped_column(String(100), index=True, nullable=True)
     supersedes_id: Mapped[Optional[str]] = mapped_column(String(36), nullable=True)
     fingerprint: Mapped[Optional[str]] = mapped_column(String(64), index=True)
     verification_level: Mapped[str] = mapped_column(String(20), default="none")  # full, partial, none

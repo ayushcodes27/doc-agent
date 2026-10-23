@@ -9,6 +9,13 @@ and verifies evidence snippets exist in the raw document text.
 import re
 import difflib
 from typing import Dict, Any, Optional, List, Tuple
+from tools.score_and_route import (
+    evaluate_pillar_1_trust,
+    evaluate_pillar_2_math,
+    run_decision_engine,
+    normalize_str,
+    normalize_whitespace,
+)
 
 
 def _normalize_string(val: Optional[str]) -> str:

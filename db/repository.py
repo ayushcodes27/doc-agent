@@ -5,6 +5,7 @@ Data access layer for invoice persistence, human review management,
 historical vendor spend querying for anomaly detection, and analytics aggregation.
 """
 
+import re
 from typing import List, Dict, Any, Optional, Tuple
 from datetime import datetime, timezone
 import statistics
@@ -41,6 +42,9 @@ def save_processed_invoice(
     reasoning = workflow_result.get("decision_reasoning", "")
     is_duplicate = bool(workflow_result.get("is_duplicate", False))
     
+    raw_inv_num = extracted.get("invoice_number")
+    inv_num_norm = re.sub(r"[^A-Za-z0-9]", "", raw_inv_num or "").upper() if raw_inv_num else None
+
     # Check if an existing record exists for this thread_id
     existing: Optional[InvoiceRecord] = db.scalar(
         select(InvoiceRecord).where(InvoiceRecord.thread_id == thread_id)
@@ -51,7 +55,8 @@ def save_processed_invoice(
         invoice.filename = filename
         invoice.vendor_name = extracted.get("vendor_name")
         invoice.vendor_id = extracted.get("vendor_id")
-        invoice.invoice_number = extracted.get("invoice_number")
+        invoice.invoice_number = raw_inv_num
+        invoice.invoice_number_norm = inv_num_norm
         invoice.invoice_date = extracted.get("invoice_date")
         invoice.due_date = extracted.get("due_date")
         invoice.currency = extracted.get("currency", "INR")
@@ -85,7 +90,8 @@ def save_processed_invoice(
             filename=filename,
             vendor_name=extracted.get("vendor_name"),
             vendor_id=extracted.get("vendor_id"),
-            invoice_number=extracted.get("invoice_number"),
+            invoice_number=raw_inv_num,
+            invoice_number_norm=inv_num_norm,
             invoice_date=extracted.get("invoice_date"),
             due_date=extracted.get("due_date"),
             currency=extracted.get("currency", "INR"),

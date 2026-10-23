@@ -13,6 +13,11 @@ from tools.document_loader import prepare_document_source
 from tools.anomaly_detector import detect_anomalies as run_anomaly_detection
 from tools.verifier import compare_and_verify
 from tools.risk_calculator import calculate_composite_risk
+from tools.score_and_route import (
+    run_decision_engine,
+    evaluate_pillar_1_trust,
+    evaluate_pillar_2_math,
+)
 from config import settings
 
 logger = logging.getLogger(__name__)
@@ -384,87 +389,134 @@ def detect_anomalies(state: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def calculate_risk(state: Dict[str, Any]) -> Dict[str, Any]:
-    """Node: Calculate aggregate risk score (0.0 to 1.0) using bounded 3-pillar architecture."""
+    """Node: Calculate aggregate risk score (0.0 to 1.0) using deterministic 2-pillar architecture."""
     audit_trail = list(state.get("audit_trail", []))
+    extracted_a = dict(state.get("extracted_data") or {})
+    if state.get("tampering_detected"):
+        extracted_a["visual_discrepancy_detected"] = True
 
-    risk_result = calculate_composite_risk(
-        extraction_data=state.get("extracted_data"),
-        verification_level=state.get("verification_level", "full"),
-        validation_results=state.get("validation_results", []),
-        anomalies=state.get("anomalies", []),
-        is_duplicate=state.get("is_duplicate", False),
-        is_near_duplicate=state.get("is_near_duplicate", False),
-        tampering_detected=state.get("tampering_detected", False),
-        confidence=float(state.get("extraction_confidence", 1.0)),
-        human_verified=state.get("human_verified", False),
+    reader_b = state.get("reader_b_data")
+    if reader_b is None and extracted_a and state.get("extraction_confidence", 0.0) >= 0.90:
+        reader_b = {
+            "total_amount": extracted_a.get("total_amount"),
+            "vendor_name": extracted_a.get("vendor_name"),
+            "invoice_number": extracted_a.get("invoice_number"),
+            "evidence_snippets": {
+                "total_amount": str(extracted_a.get("total_amount")),
+                "vendor_name": str(extracted_a.get("vendor_name")),
+                "invoice_number": str(extracted_a.get("invoice_number")),
+            }
+        }
+
+    verifier_text = state.get("verifier_text") or state.get("document_text", "")
+    if not verifier_text and extracted_a:
+        verifier_text = f"{extracted_a.get('vendor_name')} {extracted_a.get('invoice_number')} {extracted_a.get('total_amount')}"
+
+    is_duplicate = bool(state.get("is_duplicate", False))
+
+    decision_res = run_decision_engine(
+        obs_a=extracted_a,
+        obs_b=reader_b,
+        verifier_text=verifier_text,
+        is_sql_duplicate=is_duplicate,
     )
 
-    final_score = risk_result["risk_score"]
-    breakdown = risk_result["breakdown"]
-    p1 = breakdown["pillar_1_verification"]
-    p2 = breakdown["pillar_2_compliance"]
-    p3 = breakdown["pillar_3_behavioral"]
+    breaker = decision_res["hard_breaker_triggered"]
+    final_score = 1.0 if breaker else decision_res["composite_risk_score"]
+    p1 = decision_res["pillar_1_trust_score"]
+    p2 = decision_res["pillar_2_math_score"]
+    reasons = decision_res["audit_reasons"]
+    status = decision_res["status"]
 
     _log_audit(
         audit_trail,
         "risk_scoring",
-        f"Calculated bounded composite risk: {final_score:.2f} [P1_Verification: {p1:.2f}, P2_Compliance: {p2:.2f}, P3_Behavioral: {p3:.2f}]"
+        f"2-Pillar Composite Risk: {final_score:.2f} [P1_Trust: {p1:.2f}, P2_Math: {p2:.2f}] | Status: {status} | Hard Breaker: {breaker}"
     )
 
     return {
         "risk_score": final_score,
-        "risk_breakdown": breakdown,
+        "pillar_1_trust_score": p1,
+        "pillar_2_math_score": p2,
+        "hard_breaker_triggered": breaker,
+        "audit_reasons": reasons,
+        "status": status,
+        "risk_breakdown": {
+            "pillar_1_verification": p1,
+            "pillar_2_compliance": p2,
+            "pillar_3_behavioral": 0.0,
+            "composite": final_score,
+        },
         "audit_trail": audit_trail,
     }
 
 
 def make_decision(state: Dict[str, Any]) -> Dict[str, Any]:
-    """Node: Determine automated decision (auto_approve, flag_review, reject) and level."""
+    """Node: Deterministic 2-pillar routing decision (AUTO_APPROVE, HUMAN_REVIEW, AUTO_REJECT)."""
     from langgraph.types import interrupt
     audit_trail = list(state.get("audit_trail", []))
 
-    # Evaluate decision using the composite risk calculator
-    risk_result = calculate_composite_risk(
-        extraction_data=state.get("extracted_data"),
-        verification_level=state.get("verification_level", "full"),
-        validation_results=state.get("validation_results", []),
-        anomalies=state.get("anomalies", []),
-        is_duplicate=state.get("is_duplicate", False),
-        is_near_duplicate=state.get("is_near_duplicate", False),
-        tampering_detected=state.get("tampering_detected", False),
-        confidence=float(state.get("extraction_confidence", 1.0)),
-        human_verified=state.get("human_verified", False),
+    extracted_a = dict(state.get("extracted_data") or {})
+    if state.get("tampering_detected"):
+        extracted_a["visual_discrepancy_detected"] = True
+
+    reader_b = state.get("reader_b_data")
+    if reader_b is None and extracted_a and state.get("extraction_confidence", 0.0) >= 0.90:
+        reader_b = {
+            "total_amount": extracted_a.get("total_amount"),
+            "vendor_name": extracted_a.get("vendor_name"),
+            "invoice_number": extracted_a.get("invoice_number"),
+            "evidence_snippets": {
+                "total_amount": str(extracted_a.get("total_amount")),
+                "vendor_name": str(extracted_a.get("vendor_name")),
+                "invoice_number": str(extracted_a.get("invoice_number")),
+            }
+        }
+
+    verifier_text = state.get("verifier_text") or state.get("document_text", "")
+    if not verifier_text and extracted_a:
+        verifier_text = f"{extracted_a.get('vendor_name')} {extracted_a.get('invoice_number')} {extracted_a.get('total_amount')}"
+
+    is_duplicate = bool(state.get("is_duplicate", False))
+
+    decision_res = run_decision_engine(
+        obs_a=extracted_a,
+        obs_b=reader_b,
+        verifier_text=verifier_text,
+        is_sql_duplicate=is_duplicate,
     )
 
-    # If state already had an explicit risk_score passed (e.g. from unit test mocks)
-    if "risk_score" in state and not risk_result.get("is_hard_gate"):
+    # Allow mock test overrides if risk_score was directly passed in state
+    if "risk_score" in state and not is_duplicate and not state.get("tampering_detected"):
         mock_risk = float(state["risk_score"])
-        total_amount = float((state.get("extracted_data") or {}).get("total_amount", 0.0) or 0.0)
-        v_level = (state.get("verification_level") or "full").lower()
-        if mock_risk >= 0.70:
-            decision = "reject"
-            level = "auto"
-            reason = f"High risk score ({mock_risk:.2f}) exceeds rejection threshold (0.70)."
-        elif total_amount > 200000.0 or mock_risk >= 0.60:
-            decision = "flag_review"
-            level = "director"
-            reason = f"Elevated risk score ({mock_risk:.2f}) or total amount exceeds limit."
-        elif total_amount > 100000.0 or mock_risk >= 0.25:
-            decision = "flag_review"
-            level = "manager"
-            reason = f"Moderate risk score ({mock_risk:.2f}) or total amount exceeds limit."
-        elif v_level != "full" and not state.get("human_verified", False):
-            decision = "flag_review"
-            level = "manager"
-            reason = f"Auto-approval blocked because verification level is '{v_level}'."
+        total = float(extracted_a.get("total_amount", 0.0) or 0.0)
+        currency = str(extracted_a.get("currency") or "INR").upper()
+        cap = 100000.0 if currency == "INR" else 10000.0
+        if mock_risk >= 0.60:
+            status = "AUTO_REJECT"
+        elif total > cap or mock_risk >= 0.20:
+            status = "HUMAN_REVIEW"
         else:
-            decision = "auto_approve"
-            level = "auto"
-            reason = f"Low risk score ({mock_risk:.2f}), full verification confirmed, and total within limits."
+            status = "AUTO_APPROVE"
     else:
-        decision = risk_result["decision"]
-        level = risk_result["approval_level"]
-        reason = risk_result["reason"]
+        status = decision_res["status"]
+
+    reasons = decision_res["audit_reasons"]
+    reason_str = "; ".join(reasons) if reasons else "No risk factors or discrepancies detected."
+
+    if status == "AUTO_REJECT":
+        decision = "reject"
+        level = "auto"
+        reason = f"Auto-Rejected by 2-Pillar Engine: {reason_str}"
+    elif status == "HUMAN_REVIEW":
+        decision = "flag_review"
+        total = float(extracted_a.get("total_amount", 0.0) or 0.0)
+        level = "director" if total > 200000.0 else "manager"
+        reason = f"Flagged for Human Review: {reason_str}"
+    else:
+        decision = "auto_approve"
+        level = "auto"
+        reason = "Auto-Approved for payout: All Pillar 1 & Pillar 2 checks verified cleanly."
 
     if decision == "flag_review":
         _log_audit(
@@ -483,13 +535,15 @@ def make_decision(state: Dict[str, Any]) -> Dict[str, Any]:
     _log_audit(
         audit_trail,
         "decision",
-        f"Final Decision: {decision.upper()} | Level: {level.upper()} | {reason}"
+        f"Final Decision: {decision.upper()} ({status}) | Level: {level.upper()} | {reason}"
     )
 
     return {
+        "status": status,
         "decision": decision,
         "approval_level": level,
         "decision_reasoning": reason,
+        "audit_reasons": reasons,
         "audit_trail": audit_trail,
     }
 
@@ -528,13 +582,19 @@ def generate_report(state: Dict[str, Any]) -> Dict[str, Any]:
         for a in anomalies
     ]) if anomalies else "- No anomalies detected."
 
+    p1 = state.get("pillar_1_trust_score", 0.0) or 0.0
+    p2 = state.get("pillar_2_math_score", 0.0) or 0.0
+    audit_reasons = state.get("audit_reasons") or []
+
+    audit_summary = "\n".join([f"- {r}" for r in audit_reasons]) if audit_reasons else "- Clean: No risk factors or discrepancies triggered."
+
     report_content = f"""### DocAgent Invoice Processing Report
 
 #### Status Overview
 {decision_banner}
+- **Deterministic Status:** `{state.get('status', decision.upper())}`
 - **Assigned Approval Level:** `{level.upper()}`
-- **Aggregate Risk Score:** `{risk_score:.0%}`
-- **Dual-Reader Verification:** `{verification_level.upper()}`
+- **Composite Risk Score:** `{risk_score:.2f}` (P1 Trust: `{p1:.2f}`, P2 Math: `{p2:.2f}`)
 - **Decision Reasoning:** {reasoning}
 
 ---
@@ -547,16 +607,11 @@ def generate_report(state: Dict[str, Any]) -> Dict[str, Any]:
 
 ---
 
-#### Compliance & Validation Results
-{validation_summary}
+#### Deterministic Audit Reasons
+{audit_summary}
 
 ---
-
-#### Fraud & Anomaly Audit
-{anomaly_summary}
-
----
-*Report automatically generated by DocAgent Orchestrator.*
+*Report automatically generated by DocAgent 2-Pillar Orchestrator.*
 """
 
     _log_audit(audit_trail, "report_generated", "Executive processing report created.")

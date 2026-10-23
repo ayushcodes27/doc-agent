@@ -41,7 +41,12 @@ class AgentState(TypedDict):
 
     # Decision Engine Outputs
     risk_score: float                               # 0.0 to 1.0 aggregate risk score
-    risk_breakdown: Optional[Dict[str, float]]      # 3-pillar breakdown (verification, compliance, behavioral)
+    risk_breakdown: Optional[Dict[str, float]]      # Pillar breakdown
+    pillar_1_trust_score: Optional[float]           # Pillar 1 Trust & Extraction score (max 0.50)
+    pillar_2_math_score: Optional[float]            # Pillar 2 Math & Dedup score (max 0.50)
+    hard_breaker_triggered: Optional[bool]          # True if hard breaker tripped
+    audit_reasons: Optional[List[str]]              # Deterministic audit reasons list
+    status: Optional[str]                           # "AUTO_APPROVE" | "HUMAN_REVIEW" | "AUTO_REJECT"
     decision: str                                   # "auto_approve" | "flag_review" | "reject"
     decision_reasoning: str                         # Detailed reasoning explanation
     approval_level: str                             # "auto" | "manager" | "director"

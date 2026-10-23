@@ -15,55 +15,62 @@
 ## System Architecture
 
 <div align="center">
-  <img src="images/architect.png" alt="DocAgent System Architecture" width="850"/>
+  <img src="images/docagent_archi.png" alt="DocAgent System Architecture" width="850"/>
 </div>
 
-<details>
-<summary><b>View Interactive Mermaid Architecture Source</b></summary>
+### End-to-End Data Flow
+
+<div align="center">
+  <img src="images/docagent_dataflow.png" alt="DocAgent End-to-End Data Flow" width="850"/>
+</div>
+
+<details open>
+<summary><b>End-to-End System Architecture (Deterministic 2-Pillar Flow)</b></summary>
 
 ```mermaid
-graph TB
-    classDef clientStyle fill:#EBF5FB,stroke:#2980B9,stroke-width:2px,color:#1B4F72;
-    classDef gatewayStyle fill:#E8F8F5,stroke:#16A085,stroke-width:2px,color:#0E6251;
-    classDef agentStyle fill:#FEF9E7,stroke:#F39C12,stroke-width:2px,color:#7D6608;
-    classDef toolStyle fill:#FDEDEC,stroke:#E74C3C,stroke-width:2px,color:#78281F;
-    classDef dataStyle fill:#F4ECF7,stroke:#8E44AD,stroke-width:2px,color:#512E5F;
+flowchart TD
+    classDef startEnd fill:#e1f5fe,stroke:#0288d1,stroke-width:2px;
+    classDef gate fill:#fff3e0,stroke:#f57c00,stroke-width:2px;
+    classDef dual fill:#ede7f6,stroke:#5e35b1,stroke-width:2px;
+    classDef p1 fill:#e3f2fd,stroke:#1565c0,stroke-width:2px;
+    classDef p2 fill:#fce4ec,stroke:#c2185b,stroke-width:2px;
+    classDef approve fill:#c8e6c9,stroke:#2e7d32,stroke-width:2px;
+    classDef review fill:#ffe0b2,stroke:#ef6c00,stroke-width:2px;
+    classDef reject fill:#ffcdd2,stroke:#c62828,stroke-width:2px;
+    classDef save fill:#eceff1,stroke:#455a64,stroke-width:2px;
 
-    subgraph L1["PRESENTATION LAYER"]
-        UI["Streamlit Web UI<br/>(Live Ingestion, Review Queue, Analytics)"]:::clientStyle
-        API_CLIENT["External REST Clients / ERP Systems"]:::clientStyle
+    Start(["1. Ingestion: PDF / Image"]):::startEnd --> HashGate{"SHA-256 Hash in SQL DB?"}:::gate
+    HashGate -- "Yes (Exact Duplicate)" --> QuickReject["Instant Reject ($0 LLM Cost)"]:::reject
+    HashGate -- "No (New File)" --> Prep["PyMuPDF Prep:<br/>Render 150 DPI Image + Check Digital Text"]:::dual
+
+    subgraph Stage1 ["Stage 1: Hybrid OCR & Dual-Observer Extraction"]
+        Prep --> OCRCheck{"Digital Layer >= 50 chars?"}:::gate
+        OCRCheck -- "Yes" --> NativeText["Native Digital Text"]
+        OCRCheck -- "No (Scanned PDF)" --> RapidOCR["RapidOCR Fallback (CPU ONNX)"]:::dual
+
+        Prep --> ObsA["Observer A: Gemini Flash Vision<br/>(150 DPI Image + Raw Digital Layer)<br/>Extracts Full Schema + Tampering Flag"]:::dual
+        NativeText & RapidOCR --> ObsB["Observer B: GPT-4o-mini (temp=0.0)<br/>(Verifier Text Only)<br/>Extracts 3 Anchors + Evidence Snippets"]:::dual
     end
 
-    subgraph L2["API GATEWAY & CONTROLLER"]
-        FASTAPI["FastAPI Application<br/>(File Parsing, Async Endpoints, Auth & CORS)"]:::gatewayStyle
+    subgraph Stage2 ["Stage 2: Deterministic 2-Pillar Scoring Engine"]
+        ObsA & ObsB --> P1["Pillar 1: Extraction & Observer Trust (Max 0.50)<br/>• Hard Breaker: Tampering=True OR Total Diff > $0.05<br/>• Vendor Name Fuzzy < 80% (+0.20)<br/>• Invoice # Edit Dist > 1 (+0.15)<br/>• Missing Evidence Snippet (+0.15)"]:::p1
+        
+        ObsA --> P2["Pillar 2: Hard Math & SQL Dedup (Max 0.50)<br/>• Hard Breaker: SQL Duplicate Inv# + Vendor<br/>• Sum(Line Items) != Subtotal (+0.25)<br/>• Subtotal + Tax != Total (+0.25)<br/>• Due Date < Inv Date (+0.15) | Total > $10k (+0.25)"]:::p2
+
+        P1 & P2 --> Breaker{"Any Hard Breaker Triggered?"}:::gate
+        Breaker -- "No" --> Calc["Composite Risk Score: R = P1 + P2<br/>Bounded: [0.00, 1.00]"]:::save
     end
 
-    subgraph L3["AGENTIC ORCHESTRATION ENGINE (LangGraph)"]
-        GRAPH["StateGraph Workflow Runner<br/>• Self-Correction Extraction Loop<br/>• Deterministic Business Rule Engine (9 Rules)<br/>• Composite Risk Scoring & Threshold Routing<br/>• Human-in-the-Loop Checkpoint Pausing"]:::agentStyle
-    end
+    Breaker -- "Yes" --> AutoReject["Auto-Reject"]:::reject
+    Calc -- "R >= 0.60" --> AutoReject
+    Calc -- "0.20 <= R < 0.60" --> HumanReview["Human Review Queue"]:::review
+    Calc -- "R < 0.20" --> AutoApprove["Auto-Approve for Payout"]:::approve
 
-    subgraph L4["AI & INTELLIGENCE SERVICES"]
-        direction LR
-        LLM_PRIMARY["Gemini Multimodal<br/>(Vision & Structured JSON)"]:::toolStyle
-        LLM_FALLBACK["GitHub Models / GPT-4o<br/>(Automatic Fallback)"]:::toolStyle
-        ANOMALY_ENGINE["Statistical & Forensic Engine<br/>(Z-Score Outliers, Round Numbers, Structuring)"]:::toolStyle
-    end
+    HumanReview --> HumanDec{"Reviewer Action"}:::gate
+    HumanDec -- "Approve" --> AutoApprove
+    HumanDec -- "Reject" --> AutoReject
 
-    subgraph L5["PERSISTENCE LAYER"]
-        direction LR
-        DB[("PostgreSQL / SQLite<br/>(Invoices, Line Items, Audit Logs, Validations)")]:::dataStyle
-        CACHE[("In-Memory Deduplication Cache<br/>(SHA-256 Fingerprint Registry)")]:::dataStyle
-    end
-
-    UI -->|Upload Document / Human Approval| FASTAPI
-    API_CLIENT -->|POST /process & POST /resume| FASTAPI
-    FASTAPI -->|Initialize & Run State| GRAPH
-    GRAPH <-->|Extract Structured Data| LLM_PRIMARY
-    LLM_PRIMARY -.->|On Failure / Failover| LLM_FALLBACK
-    GRAPH <-->|Detect Fraud & Pattern Outliers| ANOMALY_ENGINE
-    GRAPH <-->|Deduplication Check| CACHE
-    GRAPH <-->|Query Spend History & Persist Records| DB
-    FASTAPI -->|Stream Analytics & Status| UI
+    QuickReject & AutoApprove & AutoReject --> DB[("PostgreSQL / SQLite<br/>(Invoices Table + Audit Status Log)")]:::save
 ```
 </details>
 
@@ -72,39 +79,40 @@ graph TB
 ## Core Capabilities & Agent Pipeline
 
 ```
-Raw Invoice (PDF/Image/TXT)
+Raw Invoice (PDF / Image / TXT)
   │
-  ├─► 1. Pre-LLM Smart File Hash Gate (Zero-model-cost SHA-256 intercept with appeal/reprocess support)
+  ├─► 1. Pre-LLM SQL Hash Gate: SELECT id FROM invoices WHERE file_hash = :hash AND status != 'REJECTED'
+  │      └─► Instant reject for duplicate files ($0 LLM API Cost)
   │
-  ├─► 2. Text Prep & Concrete Tampering Inspection (White text #FFFFFF, microscopic fonts < 3pt, covered overlays)
+  ├─► 2. Ingestion & RapidOCR Fallback (tools/document_loader.py)
+  │      ├─► Renders 150 DPI page image for multimodal inspection
+  │      ├─► Extracts raw digital text layer (passed to Observer A to flag digital-vs-visual tampering)
+  │      └─► Uses RapidOCR fallback if digital text < 50 chars (passed to Observer B so scans never fail)
   │
-  ├─► 3. Primary Reader A (Multimodal Gemini 3.8 Flash vision extraction with auto-retry)
+  ├─► 3. Observer A (Gemini Flash Multimodal Vision)
+  │      └─► Extracts full invoice schema, line items, and detects visual layer discrepancy
   │
-  ├─► 4. Verifier Reader B (Independent text-only GitHub Models / GPT-4o-mini anchor field extraction)
+  ├─► 4. Observer B (GPT-4o-mini, temp=0.0)
+  │      └─► Text-only extraction of 3 key anchors + verbatim evidence snippets
   │
-  ├─► 5. Dual-Reader Verification & Grounding (Evidence snippet verification in raw text -> Full/Partial/None)
+  ├─► 5. Deterministic 2-Pillar Scoring & Routing Engine (tools/score_and_route.py)
+  │      ├─► Pillar 1: Extraction & Observer Trust (Max: 0.50)
+  │      │     • Hard Breaker: Tampering detected OR Total Diff > $0.05
+  │      │     • Soft Checks: Vendor similarity < 80% (+0.20), Inv# mismatch (+0.15), Missing snippet (+0.15)
+  │      │
+  │      ├─► Pillar 2: Hard Math & Pure SQL Deduplication (Max: 0.50)
+  │      │     • Hard Breaker: SQL Duplicate (invoice_number_norm + vendor_name)
+  │      │     • Soft Checks: Line items sum != subtotal (+0.25), Subtotal + tax != total (+0.25)
+  │      │     • Compliance: Due date < Invoice date (+0.15), Total > Payout Cap (+0.25)
+  │      │
+  │      └─► Deterministic Routing Matrix:
+  │            • Hard Breaker OR R >= 0.60 ──► AUTO_REJECT
+  │            • 0.20 <= R < 0.60          ──► HUMAN_REVIEW
+  │            • R < 0.20                  ──► AUTO_APPROVE
   │
-  ├─► 6. Legibility & OCR Quality Gate (Readability score calculation and tampering alert flagging)
+  ├─► 6. Human Review Queue & Decision Overrides (Streamlit UI with audit logs)
   │
-  ├─► 7. Compliance Validation Node (9 Business Rules: Approved Vendors, Tax Math, Spends, Dates)
-  │
-  ├─► 8. Semantic & Near-Duplicate Detection (Levenshtein distance checks excluding invoice's own case ID)
-  │
-  ├─► 9. 3-Tier Vendor Anomaly Detection (Tier 0 Cold-Start, Tier 1 Small-Sample, Tier 2 Empirical Z-Scores)
-  │
-  ├─► 10. Bounded 3-Pillar Risk Scoring & Decision Routing Node
-  │     ├── Hard Gates (Duplicates, Tampering, Verification NONE) ──► Auto-Reject (Score: 1.00)
-  │     ├── Pillar 1: Data Trust & Verification Risk (Max Ceiling: 0.25)
-  │     ├── Pillar 2: Policy & Compliance Risk + 0.15 Saturation Cap (Max Ceiling: 0.35)
-  │     ├── Pillar 3: Behavioral & Spend Anomaly Risk (Max Ceiling: 0.40)
-  │     ├── Composite Risk < 0.25 & Verification == 'FULL' & Total <= $100k ──► Auto-Approve
-  │     ├── Composite Risk ≥ 0.70 ──► Auto-Reject
-  │     └── In-between (Risk ≥ 0.25 or High Amount or Partial Verification) ──► Flag for Human Review
-  │
-  ├─► 11. Human Review Queue & Correction Loop (Max 2 re-entries limit, separation of duties, case reopening)
-  │
-  └─► 12. Tamper-Evident Hash-Chained Audit Trail (Cryptographic SHA-256 running hash chain per step)
-```
+  └─► 7. Tamper-Evident SHA-256 Hash-Chained Audit Trail
 
 ---
 
@@ -195,7 +203,7 @@ Transparent observability into every step executed by the LangGraph state machin
 | Decision Area | Technology / Pattern | Engineering Rationale |
 |---|---|---|
 | **Agent Framework** | LangGraph (StateGraph) | Deterministic state machine, checkpointing/resume capabilities, conditional routing, and granular step observability. |
-| **Multi-Modal LLMs** | Google Gemini + GitHub Models (GPT-4o) | High-speed multi-modal vision with automatic failover for high availability and zero vendor lock-in. |
+| **Multi-Modal & Dual Observer** | Gemini Flash Vision + GitHub Models (GPT-4o-mini) | Dual-observer cross-examination (multimodal extraction + verbatim evidence verifier) with automatic failover. |
 | **Duplicate Prevention** | SQL Indexing + SHA-256 Fingerprint | Sub-2ms idempotent query over key invoice attributes (`vendor:number`) in PostgreSQL/SQLite + in-memory cache without external broker dependencies. |
 | **Human-in-the-Loop** | LangGraph Interrupts | Pauses workflow execution for manager/director sign-off without dropping state; resumes via `/resume/{thread_id}`. |
 | **Backend API** | FastAPI | Async I/O, automatic OpenAPI Swagger documentation, dependency injection, and Pydantic validation. |
@@ -277,7 +285,7 @@ Transparent observability into every step executed by the LangGraph state machin
 The test suite covers data models, agent nodes, validation rules, anomaly detection, deduplication, database persistence, and the complete LangGraph workflow.
 
 ```bash
-# Run all 53 unit and integration tests
+# Run all 75 unit and integration tests
 pytest -v
 
 # Run real-world benchmark suite
@@ -301,7 +309,7 @@ doc-agent/
 ├── tools/       # Multi-modal extractors, 9-rule validator, anomaly & dedup engines
 ├── ui/          # Streamlit frontend (Document ingestion, review queue, analytics)
 ├── scripts/     # Ingestion, seeding, and downloading utilities
-├── tests/       # Pytest unit & integration test suite (63 tests)
+├── tests/       # Pytest unit & integration test suite (75 tests)
 ├── config.py    # Environment configuration & LLM provider settings
 └── docker-compose.yml # Container orchestration (API, UI, PostgreSQL)
 ```
