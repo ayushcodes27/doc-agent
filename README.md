@@ -1,5 +1,6 @@
 # DocAgent — Agentic Invoice Processing Engine
 
+[![CI](https://github.com/ayushcodes27/doc-agent/actions/workflows/ci.yml/badge.svg)](https://github.com/ayushcodes27/doc-agent/actions/workflows/ci.yml)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.110+-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com)
 [![LangGraph](https://img.shields.io/badge/LangGraph-State_Machine-orange.svg)](https://github.com/langchain-ai/langgraph)
@@ -179,6 +180,75 @@ python eval/run_eval.py --mode offline
 
 ---
 
+### 3. DeepEval G-Eval Benchmark vs Deterministic Claim Verifier
+
+To evaluate qualitative LLM reasoning and establish benchmark parity with industry standards, DocAgent was evaluated using **DeepEval's G-Eval methodology (LLM-as-a-judge)** on golden enterprise invoices, directly comparing the LLM Judge against DocAgent's deterministic token-span claim verifier:
+
+```bash
+# Run the live DeepEval G-Eval benchmark
+python eval/run_deepeval_benchmark.py
+```
+
+| Benchmark Metric | Result | Target | Status |
+|---|---|---|---|
+| **Judge Agreement Rate (Det vs G-Eval)** | `100.0%` (5/5 invoices) | `≥ 85.0%` | PASSED |
+| **Mean G-Eval Judge Score** | `0.88` / 1.00 (`4.40/5`) | `≥ 0.85` | PASSED |
+| **Mean Deterministic Claim Score** | `1.00` / 1.00 | `≥ 0.90` | PASSED |
+| **Mean G-Eval Judge Latency** | `4.29s` / document | `≤ 5.0s` | PASSED |
+| **Deterministic Verifier CI Latency** | `< 0.001s` (sub-millisecond) | `≤ 0.01s` | PASSED |
+
+*Full DeepEval reports: [`eval/deepeval_benchmark_report.md`](eval/deepeval_benchmark_report.md) and [`eval/deepeval_benchmark_report.json`](eval/deepeval_benchmark_report.json).*
+
+---
+
+### 4. Multi-Invoice Live LLM Extraction Variance Benchmark
+
+To measure non-deterministic AI variance, DocAgent was benchmarked across **15 repeated live extraction runs ($N=5$ runs each at $\text{temp}=0.1$)** across 3 distinct invoice categories (INR consulting, AWS USD cloud, Logitech hardware supplies):
+
+```bash
+# Run the live multi-invoice extraction variance benchmark
+python eval/run_extraction_variance.py
+```
+
+| Tested Invoice Category | Total Agreement Rate | Vendor Exact Match | Vendor Fuzzy Match (≥0.80) | Conf Std Dev (σ) | Status |
+|---|:---:|:---:|:---:|:---:|:---:|
+| **INR Consulting (`Infosys Limited`)** | `100.0%` (5/5) | `100.0%` | `100.0%` | `σ = 0.0000` | PASSED |
+| **USD Cloud Infra (`Amazon Web Services`)** | `100.0%` (5/5) | `100.0%` | `100.0%` | `σ = 0.0000` | PASSED |
+| **Hardware Supplies (`Logitech`)** | `100.0%` (5/5) | `100.0%` | `100.0%` | `σ = 0.0000` | PASSED |
+| **Downstream Policy Determinism** | `100.0%` (15/15) | — | — | `σ_risk = 0.00` | PASSED |
+
+*Full variance reports: [`eval/extraction_variance_report.md`](eval/extraction_variance_report.md) and [`eval/extraction_variance_report.json`](eval/extraction_variance_report.json).*
+
+---
+
+### 5. Automated CI Test Suite & AI Red-Teaming (84 Tests in CI)
+
+DocAgent enforces a multi-tier automated test suite integrated into **GitHub Actions CI** running 84 automated tests across 14 test modules:
+
+```bash
+# Run complete test suite (unit, integration, custom LLM eval, AI safety)
+pytest tests/ -v
+```
+
+| Evaluation Tier | Metric / Check | Result | Target | Status |
+|---|---|---|---|---|
+| **Deterministic Grounding** | Golden Cases Faithfulness (Rule-Based Token Verifier) | `100.0%` | `≥ 90.0%` | PASSED |
+| **Deterministic Grounding** | Golden Cases Hallucination Rate | `0.00` | `≤ 0.10` | PASSED |
+| **Hallucination Injection** | Synthetic Fictitious Field Detection Recall | `100.0%` | `100.0%` | PASSED |
+| **Custom Schema & Math** | Completeness & Arithmetic Consistency Score | `0.98` | `≥ 0.85` | PASSED |
+| **Adversarial Regression** | 20-Vector Known Attack Suite (Baseline 15% ➔ 0.0%) | `0.00%` (0/20) | `0.00%` | PASSED |
+| **Novel Generalization** | 5 Held-Out Attack Vectors (Multilingual, Credit Spoof) | `100.0%` Defended | `≥ 80.0%` | PASSED |
+| **AI Safety & Privacy**| PII Redaction (Credit Cards, SSNs, API Keys) | `100.0%` | `100.0%` | PASSED |
+| **Automated Pytest** | End-to-End Test Suite Pass Rate | `100.0%` (84/84) | `100.0%` | PASSED |
+
+> **Evaluation Methodology & Architectural Insights:**
+> 1. **Rule-Based Grounding vs DeepEval G-Eval LLM Judge:** Rather than introducing a non-deterministic LLM-judge in CI (which costs ~$0.002 per call and suffers from prompt drift), continuous CI verification runs a deterministic, token-span claim-grounding verifier against raw source text ($<1\text{ms}$, $\$0.00$ cost). DeepEval's G-Eval LLM Judge is utilized for pre-release qualitative benchmarking, demonstrating $100.0\%$ concordance on clean invoices. The evaluator was validated via synthetic hallucination injection (injecting fabricated entities and proving $100\%$ detection recall).
+> 2. **Multi-Invoice Variance Findings:** Live temperature-sampled testing across distinct invoice categories confirmed $100\%$ numerical total agreement and $100\%$ fuzzy vendor matching, while proving downstream policy scoring remains strictly deterministic ($\sigma_{\text{risk}} = 0.00$).
+> 3. **AI Red-Teaming & 20-Vector Regression Suite:** An unconstrained single-reader pipeline showed an initial $15.0\%$ ASR ($3/20$ breaches: Cyrillic homoglyphs, visual-digital deception, and semantic CFO waivers). Multi-layered defenses (Unicode NFKD normalization, Dual-Observer cross-examination, and SQL hash gating) remediated all 3 vulnerabilities, establishing a regression-tested $0.00\%$ ASR ($0/20$). Generalization was confirmed against 5 novel, held-out attack vectors (including multilingual smuggling and negative credit offset tricks).
+> 4. **Dual-Observer Cost & Latency Trade-Off:** Observer A (Gemini Flash Vision) + Observer B (GPT-4o-mini text verifier) adds a second model invocation (~$0.0005 total cost, average latency 11.23s). In enterprise accounts payable, fraudulent \$50,000 disbursements represent existential risk; spending a fraction of a cent and ~11s for multi-modal cross-examination delivers an overwhelming safety and compliance ROI. Pre-LLM SHA-256 hash gating completely offsets this by dropping exact duplicates at **$0.00 cost** in sub-2ms.
+
+---
+
 ## User Interface & Screenshots
 
 ### 1. Document Upload & Processing Dashboard
@@ -208,6 +278,8 @@ Transparent observability into every step executed by the LangGraph state machin
 | **Human-in-the-Loop** | LangGraph Interrupts | Pauses workflow execution for manager/director sign-off without dropping state; resumes via `/resume/{thread_id}`. |
 | **Backend API** | FastAPI | Async I/O, automatic OpenAPI Swagger documentation, dependency injection, and Pydantic validation. |
 | **Frontend UI** | Streamlit | Rapid, reactive UI rendering with interactive audit logs, pending review queues, and live analytics. |
+| **LLM Evaluation & Safety** | Deterministic Claim-Grounding & Custom G-Eval | Rule-based token grounding against raw text, synthetic hallucination injection tests, 20-attack regression suite, and 5 held-out novel attacks. |
+| **CI/CD Quality Gate** | GitHub Actions | Automated linting, 84-test pytest suite, and offline regression benchmark execution on all pushes and PRs. |
 
 ---
 
