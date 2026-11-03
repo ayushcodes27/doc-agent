@@ -1,0 +1,76 @@
+{
+  "timestamp": "2026-11-03 19:02:37 UTC",
+  "judge_model": "qwen/qwen3.8-27b",
+  "total_cases_evaluated": 5,
+  "agreement_rate": 100.0,
+  "mean_geval_score": 0.88,
+  "mean_deterministic_score": 1.0,
+  "mean_geval_latency_seconds": 4.294,
+  "case_results": [
+    {
+      "case_id": "inv_01_clean_approved_inr",
+      "vendor": "Infosys Limited",
+      "total_amount": 45360.0,
+      "deterministic_score": 1.0,
+      "deterministic_passed": true,
+      "geval_score_raw": 5,
+      "geval_score_normalized": 1.0,
+      "geval_passed": true,
+      "geval_latency_s": 1.008,
+      "geval_reasoning": "1. Fidelity & Grounding: The vendor name 'Infosys Limited' matches the header. The GSTIN '27AABCI1234F1ZM' is correctly extracted. The invoice number, date, and due date are accurate. All three line items (descriptions, quantities, unit prices, and totals) match the source table exactly. The subtotal, tax breakdown (CGST + SGST = 1680 + 1680 = 3360), and total amount are all grounded in the text.\n2. Arithmetic Consistency: Subtotal (42,000) + Tax (3,360) = 45,360, which matches the Total Amount exactly. Line item calculations (60*450=27000, 25*400=10000, 20*250=5000) are also correct.\n3. Completeness: All crucial metadata including invoice number, date, vendor, and total is present. Although 'payment_terms' is null in the JSON, the core financial and identification data is complete and accurate. The extraction is flawless.",
+      "agreement": true
+    },
+    {
+      "case_id": "inv_02_clean_approved_usd",
+      "vendor": "Amazon Web Services",
+      "total_amount": 2484.0,
+      "deterministic_score": 1.0,
+      "deterministic_passed": true,
+      "geval_score_raw": 4,
+      "geval_score_normalized": 0.8,
+      "geval_passed": true,
+      "geval_latency_s": 0.727,
+      "geval_reasoning": "1. Fidelity & Grounding: All extracted fields (vendor, invoice number, dates, amounts, line items) are present in the source document. The vendor name 'Amazon Web Services' matches. The invoice number 'AWS-SEP26-4418' matches. The dates are correctly converted to ISO format. The line items match exactly in description, quantity, rate, and amount. The subtotal, tax, and total match the source. The 'payment_terms' field is null in the extraction, whereas the source explicitly states 'Net 30'. This is a minor omission of metadata but does not affect the core financial data. \n2. Arithmetic Consistency: Subtotal ($2,300.00) + Tax ($184.00) = $2,484.00, which equals the Total Amount. The math is flawless. \n3. Completeness: Crucial metadata like invoice number, date, vendor, and total are present. The missing 'payment_terms' is a minor gap, preventing a perfect score of 5, but the core financials are clean and grounded. Therefore, a score of 4 is appropriate.",
+      "agreement": true
+    },
+    {
+      "case_id": "inv_03_clean_small",
+      "vendor": "Logitech",
+      "total_amount": 9500.0,
+      "deterministic_score": 1.0,
+      "deterministic_passed": true,
+      "geval_score_raw": 5,
+      "geval_score_normalized": 1.0,
+      "geval_passed": true,
+      "geval_latency_s": 0.681,
+      "geval_reasoning": "1. Fidelity & Grounding: All extracted fields (Vendor: Logitech, Invoice No: LOG-OFF-78126, Dates, GSTIN, Line Items) match the source document exactly. The line item descriptions, quantities, unit prices, and totals are identical to the source. \n2. Arithmetic Consistency: Subtotal (9500.0) + Tax (0.0) = Total (9500.0). The math is flawless. Individual line item calculations (e.g., 5 * 1050 = 5250) are also correct.\n3. Completeness: All crucial metadata including invoice number, date, vendor, and total amount is present. The 'payment_terms' field is null in the JSON, but the source lists 'Net 15'. While this is a minor omission of a non-financial metadata field, the core financial data and required identifiers are fully present and accurate. Given the perfect fidelity of the financial data and identifiers, this warrants a top score.",
+      "agreement": true
+    },
+    {
+      "case_id": "inv_05_unapproved_vendor",
+      "vendor": "QuickFix IT Solutions",
+      "total_amount": 22000.0,
+      "deterministic_score": 1.0,
+      "deterministic_passed": true,
+      "geval_score_raw": 4,
+      "geval_score_normalized": 0.8,
+      "geval_passed": true,
+      "geval_latency_s": 0.789,
+      "geval_reasoning": "1. Fidelity & Grounding: All extracted fields (vendor, invoice number, dates, line items, amounts) are perfectly grounded in the source text. The vendor name 'QuickFix IT Solutions' matches the header. The GSTIN matches. Line items match exactly in description, quantity, and price. \n2. Arithmetic Consistency: Subtotal (20,000) + Tax (2,000) = Total (22,000). The math is flawless. Line item totals also sum correctly to the subtotal.\n3. Completeness: Crucial metadata like invoice number, date, vendor, and total are present. However, the 'payment_terms' field is null in the extraction, whereas the source document explicitly states 'Payment Terms: Net 30'. This is a minor omission of non-financial metadata. \n4. Scoring: The extraction is fully grounded and mathematically perfect. The only deduction is for the missing 'payment_terms' field, which prevents a perfect 5 but keeps it in the 'Good' category (4) as it is a minor formatting/completeness variance rather than a financial error.",
+      "agreement": true
+    },
+    {
+      "case_id": "inv_08_math_mismatch",
+      "vendor": "HP Inc",
+      "total_amount": 20350.0,
+      "deterministic_score": 1.0,
+      "deterministic_passed": true,
+      "geval_score_raw": 4,
+      "geval_score_normalized": 0.8,
+      "geval_passed": true,
+      "geval_latency_s": 18.267,
+      "geval_reasoning": "1. Fidelity & Grounding: The vendor name 'HP Inc' matches 'HP INC.' (minor formatting variance). The GSTIN, Invoice Number, Dates, and Currency are all correctly extracted. The line items (descriptions, quantities, unit prices, and line totals) are perfectly grounded in the source table. The subtotal (18,500.00), tax (1,850.00), and total (20,350.00) match the declared figures in the document. Note: The source document contains an internal inconsistency where the sum of line items (15,000) does not equal the declared subtotal (18,500). The extraction correctly captures the *declared* financial figures rather than hallucinating a correction, which is the correct behavior for an extraction task. \n2. Arithmetic Consistency: The extracted JSON is internally consistent: Subtotal (18,500) + Tax (1,850) = Total (20,350). This passes the arithmetic check for the extracted data. \n3. Completeness: All crucial metadata (vendor, invoice #, date, total) is present. The 'payment_terms' field is null, although 'Net 30' is present in the source. This is a minor omission but does not affect the core financial integrity. \nConclusion: The extraction is highly accurate and grounded. The score is 4 instead of 5 due to the minor omission of payment terms and the vendor name formatting difference, though these are negligible.",
+      "agreement": true
+    }
+  ]
+}

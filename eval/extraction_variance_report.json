@@ -1,0 +1,172 @@
+{
+  "timestamp": "2026-11-03 19:04:08 UTC",
+  "model": "qwen/qwen3.8-27b",
+  "temperature": 0.1,
+  "invoices_evaluated": [
+    {
+      "invoice_id": "inv_01_clean_approved_inr",
+      "invoice_name": "INR Consulting (Infosys Limited)",
+      "runs_count": 5,
+      "expected_total": 45360.0,
+      "expected_vendor": "Infosys Limited",
+      "total_agreement_rate": 100.0,
+      "vendor_exact_agreement_rate": 100.0,
+      "vendor_fuzzy_agreement_rate": 100.0,
+      "mean_confidence": 1.0,
+      "std_dev_confidence": 0.0,
+      "spread_confidence": 0.0,
+      "raw_runs": [
+        {
+          "vendor_name": "INFOSYS LIMITED",
+          "invoice_number": "INF-2026-0925-017",
+          "total_amount": 45360.0,
+          "currency": "INR",
+          "confidence_score": 1.0,
+          "latency_seconds": 1.664
+        },
+        {
+          "vendor_name": "INFOSYS LIMITED",
+          "invoice_number": "INF-2026-0925-017",
+          "total_amount": 45360.0,
+          "currency": "INR",
+          "confidence_score": 1.0,
+          "latency_seconds": 0.258
+        },
+        {
+          "vendor_name": "INFOSYS LIMITED",
+          "invoice_number": "INF-2026-0925-017",
+          "total_amount": 45360.0,
+          "currency": "INR",
+          "confidence_score": 1.0,
+          "latency_seconds": 0.344
+        },
+        {
+          "vendor_name": "INFOSYS LIMITED",
+          "invoice_number": "INF-2026-0925-017",
+          "total_amount": 45360.0,
+          "currency": "INR",
+          "confidence_score": 1.0,
+          "latency_seconds": 0.269
+        },
+        {
+          "vendor_name": "INFOSYS LIMITED",
+          "invoice_number": "INF-2026-0925-017",
+          "total_amount": 45360.0,
+          "currency": "INR",
+          "confidence_score": 1.0,
+          "latency_seconds": 0.361
+        }
+      ]
+    },
+    {
+      "invoice_id": "inv_02_clean_approved_usd",
+      "invoice_name": "USD Cloud Infra (Amazon Web Services)",
+      "runs_count": 5,
+      "expected_total": 2484.0,
+      "expected_vendor": "Amazon Web Services",
+      "total_agreement_rate": 100.0,
+      "vendor_exact_agreement_rate": 100.0,
+      "vendor_fuzzy_agreement_rate": 100.0,
+      "mean_confidence": 1.0,
+      "std_dev_confidence": 0.0,
+      "spread_confidence": 0.0,
+      "raw_runs": [
+        {
+          "vendor_name": "Amazon Web Services",
+          "invoice_number": "AWS-SEP26-4418",
+          "total_amount": 2484.0,
+          "currency": "USD",
+          "confidence_score": 1.0,
+          "latency_seconds": 0.46
+        },
+        {
+          "vendor_name": "Amazon Web Services",
+          "invoice_number": "AWS-SEP26-4418",
+          "total_amount": 2484.0,
+          "currency": "USD",
+          "confidence_score": 1.0,
+          "latency_seconds": 0.227
+        },
+        {
+          "vendor_name": "Amazon Web Services",
+          "invoice_number": "AWS-SEP26-4418",
+          "total_amount": 2484.0,
+          "currency": "USD",
+          "confidence_score": 1.0,
+          "latency_seconds": 7.284
+        },
+        {
+          "vendor_name": "Amazon Web Services",
+          "invoice_number": "AWS-SEP26-4418",
+          "total_amount": 2484.0,
+          "currency": "USD",
+          "confidence_score": 1.0,
+          "latency_seconds": 3.571
+        },
+        {
+          "vendor_name": "Amazon Web Services",
+          "invoice_number": "AWS-SEP26-4418",
+          "total_amount": 2484.0,
+          "currency": "USD",
+          "confidence_score": 1.0,
+          "latency_seconds": 30.792
+        }
+      ]
+    },
+    {
+      "invoice_id": "inv_03_clean_small",
+      "invoice_name": "Hardware Supplies (Logitech)",
+      "runs_count": 5,
+      "expected_total": 9500.0,
+      "expected_vendor": "Logitech",
+      "total_agreement_rate": 100.0,
+      "vendor_exact_agreement_rate": 100.0,
+      "vendor_fuzzy_agreement_rate": 100.0,
+      "mean_confidence": 1.0,
+      "std_dev_confidence": 0.0,
+      "spread_confidence": 0.0,
+      "raw_runs": [
+        {
+          "vendor_name": "Logitech",
+          "invoice_number": "LOG-OFF-78126",
+          "total_amount": 9500.0,
+          "currency": "INR",
+          "confidence_score": 1.0,
+          "latency_seconds": 0.243
+        },
+        {
+          "vendor_name": "Logitech",
+          "invoice_number": "LOG-OFF-78126",
+          "total_amount": 9500.0,
+          "currency": "INR",
+          "confidence_score": 1.0,
+          "latency_seconds": 0.256
+        },
+        {
+          "vendor_name": "Logitech",
+          "invoice_number": "LOG-OFF-78126",
+          "total_amount": 9500.0,
+          "currency": "INR",
+          "confidence_score": 1.0,
+          "latency_seconds": 0.403
+        },
+        {
+          "vendor_name": "Logitech",
+          "invoice_number": "LOG-OFF-78126",
+          "total_amount": 9500.0,
+          "currency": "INR",
+          "confidence_score": 1.0,
+          "latency_seconds": 0.471
+        },
+        {
+          "vendor_name": "Logitech",
+          "invoice_number": "LOG-OFF-78126",
+          "total_amount": 9500.0,
+          "currency": "INR",
+          "confidence_score": 1.0,
+          "latency_seconds": 0.303
+        }
+      ]
+    }
+  ]
+}
