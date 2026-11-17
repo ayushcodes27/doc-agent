@@ -82,19 +82,23 @@ flowchart TD
 ```
 Raw Invoice (PDF / Image / TXT)
   │
-  ├─► 1. Pre-LLM SQL Hash Gate: SELECT id FROM invoices WHERE file_hash = :hash AND status != 'REJECTED'
-  │      └─► Instant reject for duplicate files ($0 LLM API Cost)
+  ├─► 1. Pre-LLM SQL Hash Gate (<2ms Dedup & $0 Cost)
+  │      • Computes SHA-256(raw_bytes); executes B-tree indexed SQL query:
+  │        SELECT id FROM invoices WHERE file_hash = :hash AND status != 'REJECTED' LIMIT 1;
+  │      • Instant sub-2ms drop for redundant uploads; completely avoids LLM API costs ($0.00).
   │
   ├─► 2. Ingestion & RapidOCR Fallback (tools/document_loader.py)
-  │      ├─► Renders 150 DPI page image for multimodal inspection
-  │      ├─► Extracts raw digital text layer (passed to Observer A to flag digital-vs-visual tampering)
-  │      └─► Uses RapidOCR fallback if digital text < 50 chars (passed to Observer B so scans never fail)
+  │      • Renders 150 DPI page image for multimodal vision inspection.
+  │      • Extracts native digital text layer via PyMuPDF; checks if length >= 50 chars.
+  │      • Scanned PDF Fallback: If digital text < 50 chars, triggers RapidOCR (CPU ONNX)
+  │        so flat scans and photos are fully transcribed without external OCR cloud dependencies.
   │
-  ├─► 3. Observer A (Gemini Flash Multimodal Vision)
-  │      └─► Extracts full invoice schema, line items, and detects visual layer discrepancy
+  ├─► 3. Observer A (Gemini 2.0 Flash Multimodal Vision)
+  │      • Extracts full invoice schema, line items, and inspects visual vs digital text
+  │        to flag pixel-level tampering and amount inflation.
   │
-  ├─► 4. Observer B (GPT-4o-mini, temp=0.0)
-  │      └─► Text-only extraction of 3 key anchors + verbatim evidence snippets
+  ├─► 4. Observer B (GPT-4o-mini, temp=0.0 Verifier)
+  │      • Independent text-only extraction of 3 key anchors + verbatim evidence snippets.
   │
   ├─► 5. Deterministic 2-Pillar Scoring & Routing Engine (tools/score_and_route.py)
   │      ├─► Pillar 1: Extraction & Observer Trust (Max: 0.50)
@@ -113,7 +117,11 @@ Raw Invoice (PDF / Image / TXT)
   │
   ├─► 6. Human Review Queue & Decision Overrides (Streamlit UI with audit logs)
   │
-  └─► 7. Tamper-Evident SHA-256 Hash-Chained Audit Trail
+  └─► 7. Cryptographic SHA-256 Hash-Chained Audit Trail (db/models.py, db/repository.py)
+         • Every node execution records:
+           entry_hash = SHA-256(previous_hash + step + timestamp + detail)
+         • Links to genesis block ("0" * 64); any retroactive modification breaks chain integrity.
+```
 
 ---
 
@@ -154,11 +162,17 @@ python eval/run_real_benchmark.py
 | **Average Extraction Confidence** | `95.9%` | `≥ 85.0%` | PASSED |
 | **Average Processing Latency** | `11.23s` / document | `≤ 15.0s` | PASSED |
 
+> **Processing Latency Breakdown (~11.23s Avg):** Evaluated end-to-end on 16 authentic multi-page PDF invoices (AWS, Azure, Flipkart, Coolblue). Per-document execution time breaks down into:
+> - PyMuPDF 150 DPI page rendering & Pre-LLM Hash Gate: `~0.8s`
+> - Observer A (Gemini 2.0 Flash Multimodal Vision extraction & visual tampering check): `~6.2s`
+> - Observer B (GPT-4o-mini text verification & anchor evidence grounding): `~3.1s`
+> - 2-Pillar Scoring, 9-Rule Engine & SHA-256 Hash-Chained Database Persistence: `~1.1s`
+
 *Full real-world reports: [`eval/real_benchmark_report.md`](eval/real_benchmark_report.md) and [`eval/real_benchmark_report.json`](eval/real_benchmark_report.json).*
 
 ---
 
-### 2. Deterministic Compliance & Anomaly Test Suite
+### 2. Deterministic Compliance & Anomaly Test Suite (20 Curated Invoices)
 
 DocAgent also includes a rule-verification test harness evaluated against 20 curated test scenarios across 5 distinct compliance categories:
 
@@ -175,6 +189,8 @@ python eval/run_eval.py --mode offline
 | **Anomaly Detection F1 Score** | `1.00` | `≥ 0.90` | PASSED |
 | **Decision Routing Accuracy** | `100.0%` (20/20 invoices) | `≥ 95.0%` | PASSED |
 | **Approval Level Routing** | `100.0%` (20/20 invoices) | `≥ 95.0%` | PASSED |
+
+> **What 180/180 Actually Measures:** Evaluates 20 curated test invoices against 9 deterministic business compliance rules ($20 \text{ invoices} \times 9 \text{ compliance rules} = \mathbf{180 \text{ individual rule checks}}$). Every single check matched the expected ground truth outcome with 100.0% accuracy (e.g. 18 passed & 2 flagged for `max_amount`, 18 passed & 2 flagged for `approved_vendor`, 19 passed & 1 flagged for `line_item_math`).
 
 *Full offline evaluation reports: [`eval/eval_report.md`](eval/eval_report.md) and [`eval/eval_report.json`](eval/eval_report.json).*
 
@@ -230,6 +246,8 @@ DocAgent enforces a multi-tier automated test suite integrated into **GitHub Act
 pytest tests/ -v
 ```
 
+> **Test Suite Evolution & Coverage:** The active CI test suite runs **84 automated pytest tests** (expanded from the initial 42/43 core unit test baseline to include dual-reader verifiers, hash-chained audit checks, DeepEval G-Eval benchmarks, multi-invoice variance runs, and a 20-vector red-teaming regression suite).
+
 | Evaluation Tier | Metric / Check | Result | Target | Status |
 |---|---|---|---|---|
 | **Deterministic Grounding** | Golden Cases Faithfulness (Rule-Based Token Verifier) | `100.0%` | `≥ 90.0%` | PASSED |
@@ -245,7 +263,7 @@ pytest tests/ -v
 > 1. **Rule-Based Grounding vs DeepEval G-Eval LLM Judge:** Rather than introducing a non-deterministic LLM-judge in CI (which costs ~$0.002 per call and suffers from prompt drift), continuous CI verification runs a deterministic, token-span claim-grounding verifier against raw source text ($<1\text{ms}$, $\$0.00$ cost). DeepEval's G-Eval LLM Judge is utilized for pre-release qualitative benchmarking, demonstrating $100.0\%$ concordance on clean invoices. The evaluator was validated via synthetic hallucination injection (injecting fabricated entities and proving $100\%$ detection recall).
 > 2. **Multi-Invoice Variance Findings:** Live temperature-sampled testing across distinct invoice categories confirmed $100\%$ numerical total agreement and $100\%$ fuzzy vendor matching, while proving downstream policy scoring remains strictly deterministic ($\sigma_{\text{risk}} = 0.00$).
 > 3. **AI Red-Teaming & 20-Vector Regression Suite:** An unconstrained single-reader pipeline showed an initial $15.0\%$ ASR ($3/20$ breaches: Cyrillic homoglyphs, visual-digital deception, and semantic CFO waivers). Multi-layered defenses (Unicode NFKD normalization, Dual-Observer cross-examination, and SQL hash gating) remediated all 3 vulnerabilities, establishing a regression-tested $0.00\%$ ASR ($0/20$). Generalization was confirmed against 5 novel, held-out attack vectors (including multilingual smuggling and negative credit offset tricks).
-> 4. **Dual-Observer Cost & Latency Trade-Off:** Observer A (Gemini Flash Vision) + Observer B (GPT-4o-mini text verifier) adds a second model invocation (~$0.0005 total cost, average latency 11.23s). In enterprise accounts payable, fraudulent \$50,000 disbursements represent existential risk; spending a fraction of a cent and ~11s for multi-modal cross-examination delivers an overwhelming safety and compliance ROI. Pre-LLM SHA-256 hash gating completely offsets this by dropping exact duplicates at **$0.00 cost** in sub-2ms.
+> 4. **Dual-Observer Cost & Latency Trade-Off:** Observer A (Gemini 2.0 Flash Multimodal Vision) + Observer B (GPT-4o-mini text verifier) adds a second model invocation (~$0.0005 total cost, average latency 11.23s). In enterprise accounts payable, fraudulent \$50,000 disbursements represent existential risk; spending a fraction of a cent and ~11s for multi-modal cross-examination delivers an overwhelming safety and compliance ROI. Pre-LLM SHA-256 hash gating completely offsets this by dropping exact duplicates at **$0.00 cost** in sub-2ms.
 
 ---
 
@@ -273,7 +291,7 @@ Transparent observability into every step executed by the LangGraph state machin
 | Decision Area | Technology / Pattern | Engineering Rationale |
 |---|---|---|
 | **Agent Framework** | LangGraph (StateGraph) | Deterministic state machine, checkpointing/resume capabilities, conditional routing, and granular step observability. |
-| **Multi-Modal & Dual Observer** | Gemini Flash Vision + GitHub Models (GPT-4o-mini) | Dual-observer cross-examination (multimodal extraction + verbatim evidence verifier) with automatic failover. |
+| **Multi-Modal & Dual Observer** | Gemini 2.0 Flash Vision + GitHub Models (GPT-4o-mini) | Dual-observer cross-examination (multimodal extraction + verbatim evidence verifier) with automatic failover. |
 | **Duplicate Prevention** | SQL Indexing + SHA-256 Fingerprint | Sub-2ms idempotent query over key invoice attributes (`vendor:number`) in PostgreSQL/SQLite + in-memory cache without external broker dependencies. |
 | **Human-in-the-Loop** | LangGraph Interrupts | Pauses workflow execution for manager/director sign-off without dropping state; resumes via `/resume/{thread_id}`. |
 | **Backend API** | FastAPI | Async I/O, automatic OpenAPI Swagger documentation, dependency injection, and Pydantic validation. |

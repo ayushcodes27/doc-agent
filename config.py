@@ -7,7 +7,7 @@ class Settings(BaseSettings):
     # LLM Config
     LLM_PROVIDER: str = "auto"  # 'auto', 'gemini', 'github_models', 'groq'
     GEMINI_API_KEY: str = ""
-    GEMINI_MODEL: str = "gemini-3.6-flash"
+    GEMINI_MODEL: str = "gemini-2.0-flash"
     GITHUB_TOKEN: str = ""
     GITHUB_MODEL: str = "gpt-4o-mini"
     GITHUB_ENDPOINT: str = "https://models.inference.ai.azure.com"
